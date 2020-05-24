@@ -7,33 +7,28 @@ import torch.utils as utils
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
+from params import par
+from torch.nn.init import kaiming_normal_, orthogonal_
 
-def pose_loss(output_1,output_2, target_1, traget_2):
 
-    P = torch.dot(output_1, output_2)
-    P_truth = torch.dot(target_1, target_2)
+
+def pose_loss(output, target):
+
+    temp = output[0]
+    temp_2 = output[1]
+    P = torch.dot(temp, temp_2)
+
+
+    taget_t = target[0]
+    target_t_2 = target[1]
+    P_truth = torch.dot(temp,temp_2)
+
+
     loss = (P - P_truth)**2
-    return loss 
-
-def now_loss(output_1,target_1):
-    return torch.mean((output_1 - target_1) ** 2)
-
-def my_loss(out, tar):
-
-    loss = 0
-    loss += pose_loss(out[0],out[1],tar[0],tar[1])
-    loss += pose_loss(out[1],out[2],tar[1],tar[2])
-    loss += pose_loss(out[2].out[3].tar[2],tar[3])
-    loss += pose_loss(out[3],out[4],tar[3],tar[4])
-    loss += pose_loss(out[0],out[2],tar[0],tar[2])
-    loss += pose_loss(out[2],out[4],tar[2],tar[4])
-    loss += pose_loss(out[0],out[4],tar[0],tar[4]) 
-    loss += now_loss(out[0],tar[0])
-    loss += now_loss(out[1],tar[1])
-    loss += now_loss(out[2],tar[2])
-    loss += now_loss(out[3],tar[3])
-    loss += now_loss(out[4],tar[4])
     return loss
+
+
+
 
 class Tobi_model(nn.Module):
     def __init__(self):
@@ -193,6 +188,46 @@ def test():
     net = ResNet18()
     y = net(torch.randn(1, 3, 32, 32))
     print(y.size())
+
+
+
+
+class loss_cal(nn.Module):
+    def __init__(self,block):
+        super(loss_cal, self).__init__()
+        self.out_tensor=torch.ones(5,7)
+        self.num=0
+
+    def add_loss(self, out_):
+        for i in range(5):
+            if i!=4:
+                self.out_tensor[i] = self.out_tensor[i+1]
+            else:
+                self.out_tensor[i] = out_
+        self.num+=1
+    
+    def calculate_loss(self):
+        if self.num>=5:
+            loss = my_lose(self.out_tensor)
+            return loss
+        else:
+            pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
