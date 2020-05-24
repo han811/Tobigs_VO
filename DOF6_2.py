@@ -43,8 +43,8 @@ class Tobi_model(nn.Module):
         self.Res_5 = res_5()
         self.Res_5_2 = res_5_2()
         self.ELU = nn.ELU()
-        self.rnn = nn.LSTM(input_size=98304, hidden_size=1000, num_layers=2, batch_first=True)
-        self.rnn_2 = nn.LSTM(input_size=98304, hidden_size=1000, num_layers=1, batch_first=True)
+        self.rnn = nn.LSTM(input_size=int(98304/4), hidden_size=1000, num_layers=2, batch_first=True)
+        self.rnn_2 = nn.LSTM(input_size=int(98304/4), hidden_size=1000, num_layers=1, batch_first=True)
         self.fc1 = nn.Linear(1000, 1024)
         self.fc2 = nn.Linear(2048, 1024)
         self.fc3 = nn.Linear(1024, 1024)
@@ -62,10 +62,13 @@ class Tobi_model(nn.Module):
         #RCNN1
         x_3 = torch.cat([x_1,x_2],dim = 1)
         x_3 = self.Res_5_2(x_3)
+        # x_3 = nn.functional.avg_pool2d(x_3, 4)
         x_3, h_c = self.rnn(x_3)
         x_3 = self.fc1(x_3)
         #RCNN2
         x_2 = self.Res_5(x_2)
+        # x_2 = nn.functional.avg_pool2d(x_2, 4)
+
         x_2, h_c_2 = self.rnn_2(x_2)
         x_2 = self.fc1(x_2)
         x_2 = self.ELU(x_2)
@@ -186,7 +189,7 @@ class ResNet_5(nn.Module):
     def forward(self, x):
         out = self.layer1_(x)
         out = self.ELU(out)
-        out = nn.functional.avg_pool2d(out, 4)
+        out = nn.functional.avg_pool2d(out, 8)
         out = out.view(1,out.size(0), -1)
         # out = self.linear(out)
         return out
@@ -213,7 +216,7 @@ class ResNet_5_2(nn.Module):
     def forward(self, x):
         out = self.layer1_(x)
         out = self.ELU(out)
-        out = nn.functional.avg_pool2d(out, 4)
+        out = nn.functional.avg_pool2d(out, 8)
         out = out.view(1,out.size(0), -1)
         # out = self.linear(out)
         return out
@@ -300,12 +303,12 @@ loss_ = loss_cal(label)
 #         fin_out_ = torch.cat([pre_out_,out_],dim=0)
 #         print(fin_out_.size()) 
 
-tobiVO = Tobi_model().to('cuda')
-# tobiVO = Tobi_model()
+# tobiVO = Tobi_model().to('cpu')
+tobiVO = Tobi_model()
 cal_loss = 0
 torch.save(tobiVO,'./modelsize')
 # print(tobiVO.eval())
-summary(tobiVO,(3,256,192))
+# summary(tobiVO,input_size=(3,256,192),device='cpu')
 with torch.no_grad():
     for i in range(input.size()[0]):
         temp_loss = 0
