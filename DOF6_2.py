@@ -11,8 +11,26 @@ from params import par
 from torch.nn.init import kaiming_normal_, orthogonal_
 
 
-class Tobi_model(nn.Module):
 
+def pose_loss(output, target):
+
+    temp = output[0]
+    temp_2 = output[1]
+    P = torch.dot(temp, temp_2)
+
+
+    taget_t = target[0]
+    target_t_2 = target[1]
+    P_truth = torch.dot(temp,temp_2)
+
+
+    loss = (P - P_truth)**2
+    return loss
+
+
+
+
+class Tobi_model(nn.Module):
     def __init__(self):
         super(Tobi_model, self).__init__()
         self.Res = ResNet50()
@@ -22,31 +40,47 @@ class Tobi_model(nn.Module):
         self.rnn_2 = nn.LSTM(input_size=49152, hidden_size=1000, num_layers=1, batch_first=True)
         self.fc1 = nn.Linear(1000, 1024)
         self.fc2 = nn.Linear(2048, 1024)
+        self.fc3 = nn.Linear(1024, 1024)
+        self.final_1 = nn.Linear(1024, 3)
+        self.final_2 = nn.Linear(1024, 4)
 
-    def forward(self, x):
-
+    def sequence_1(self, x):
         x_1 = x[0]  # t-1  step
         x_2 = x[1]  # t step
-        #Residual block pass & concat
+        
+        #Residual block pass 
         x_1 = self.Res(x_1) 
         x_2 = self.Res(x_2)
+
         #RCNN1
-        x_3 = torch.cat([x_2,x_2],dim=0)
-        x_3 = self.rnn(x_3)
+        x_3 = torch.cat([x_2,x_2],dim = 0)
+        x_3, h_c = self.rnn(x_3)
         x_3 = self.fc1(x_3)
         #RCNN2
-        x_2 = self.rnn_2(x_2)
+        x_2, h_c_2 = self.rnn_2(x_2)
         x_2 = self.fc1(x_2)
+        x_2 = self.ELU(x_2)
         #FC layer
         x_3 = torch.cat([x_2,x_3],dim = 0)
         x_3 = self.fc2(x_3)
 
+        #Translation
+        x_4 = self.fc3(x_3)
+        x_4 = self.final_1(x_4)
 
+        #Quanternion
+        x_5 = self.fc3(x_3)
+        x_5 = self.final_2(x_3)
+        out = torch.cat([x_2,x_3], dim = 0)
         return out
+
+    def forward(self, x)
+
 
 
 ## ResNet Block
 class ResNet(nn.Module):
+
     def __init__(self, block, num_blocks):
         super(ResNet, self).__init__()
         self.in_planes = 64 
@@ -59,6 +93,7 @@ class ResNet(nn.Module):
         self.linear = nn.Linear(2048, 1024)
         self.ELU = nn.ELU()
 
+
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)
         layers = []
@@ -66,6 +101,7 @@ class ResNet(nn.Module):
             layers.append(block(self.in_planes, planes, stride))
             self.in_planes = planes * block.expansion
         return nn.Sequential(*layers)
+
 
     def forward(self, x): # 4번째 layer 및 ave_pool은 하지 않음
         out = self.conv1(x) 
@@ -102,6 +138,7 @@ class Bottleneck(nn.Module):
             )
         self.elu = nn.ELU(inplace = True) # ELU 추가됨
     #Bottle Neck 한 덩어리 이게 3,4,6,3번 반복되면 Resnet 50!
+
     def forward(self, x):
         out = self.elu(self.bn1(self.conv1(x)))
         out = self.elu(self.bn2(self.conv2(out)))
