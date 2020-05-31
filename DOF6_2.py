@@ -43,8 +43,8 @@ class Tobi_model(nn.Module):
         self.Res_5 = res_5()
         self.Res_5_2 = res_5_2()
         self.ELU = nn.ELU()
-        self.rnn = nn.LSTM(input_size=int(98304/4), hidden_size=1000, num_layers=2, batch_first=True)
-        self.rnn_2 = nn.LSTM(input_size=int(98304/4), hidden_size=1000, num_layers=1, batch_first=True)
+        self.rnn = nn.LSTM(input_size=int(98304/24), hidden_size=1000, num_layers=2, batch_first=True)
+        self.rnn_2 = nn.LSTM(input_size=int(98304/24), hidden_size=1000, num_layers=1, batch_first=True)
         self.fc1 = nn.Linear(1000, 1024)
         self.fc2 = nn.Linear(2048, 1024)
         self.fc3 = nn.Linear(1024, 1024)
@@ -91,7 +91,6 @@ class Tobi_model(nn.Module):
         return out
 
     # def forward(self, x)
-
 
 
 ## ResNet Block
@@ -189,7 +188,7 @@ class ResNet_5(nn.Module):
     def forward(self, x):
         out = self.layer1_(x)
         out = self.ELU(out)
-        out = nn.functional.avg_pool2d(out, 8)
+        out = nn.functional.avg_pool2d(out, 16)
         out = out.view(1,out.size(0), -1)
         # out = self.linear(out)
         return out
@@ -216,7 +215,7 @@ class ResNet_5_2(nn.Module):
     def forward(self, x):
         out = self.layer1_(x)
         out = self.ELU(out)
-        out = nn.functional.avg_pool2d(out, 8)
+        out = nn.functional.avg_pool2d(out, 16)
         out = out.view(1,out.size(0), -1)
         # out = self.linear(out)
         return out
@@ -262,7 +261,7 @@ class loss_cal(nn.Module):
             pass
 
 
-
+print('before concat sample')
 ###############################
 ## test tensor concat sample ##
 ###############################
@@ -303,29 +302,33 @@ loss_ = loss_cal(label)
 #         fin_out_ = torch.cat([pre_out_,out_],dim=0)
 #         print(fin_out_.size()) 
 
+print('before Tobi model')
+
 # tobiVO = Tobi_model().to('cpu')
 tobiVO = Tobi_model()
 cal_loss = 0
 torch.save(tobiVO,'./modelsize')
 # print(tobiVO.eval())
 # summary(tobiVO,input_size=(3,256,192),device='cpu')
-with torch.no_grad():
-    for i in range(input.size()[0]):
-        temp_loss = 0
 
-        if i>=1:
-            input_ = torch.cat([input[i-1],input[i]],dim=0)
-            finout = tobiVO.forward(input_)
-            # print(loss_.num)
+print('before Tobi model')
+# with torch.no_grad():
+for i in range(input.size()[0]):
+    temp_loss = 0
 
-            if(loss_.num>=5):
-                # print('hi')
-                temp_loss = loss_.calculate_loss(finout)
-                cal_loss += temp_loss
-                print(cal_loss)
-            else:
-                loss_.calculate_loss(finout)
+    if i>=1:
+        input_ = torch.cat([input[i-1],input[i]],dim=0)
+        finout = tobiVO.forward(input_)
+        # print(loss_.num)
+
+        if(loss_.num>=5):
+            # print('hi')
+            temp_loss = loss_.calculate_loss(finout)
+            cal_loss += temp_loss
+            print(cal_loss)
+        else:
+            loss_.calculate_loss(finout)
         
-    
-
+print('all ran')    
+print(type(cal_loss))
 
