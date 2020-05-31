@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html class="ng-csp" data-placeholder-focus="false" lang="en" >
+	<head data-requesttoken="MgQsK2wWHyEbZmh9L1p9TBcCBwxxaAQGNQYHOQwPDFM=:jFui4YPSI+ZEL9N9NrJfZ2jhqW4LVbHjsESZW0T1uII=">
+		<meta charset="utf-8">
+		<title>
+		polybox		</title>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="referrer" content="never">
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0">
+		<meta name="theme-color" content="#745bca">
+		<link rel="icon" href="/apps/theme-polybox/core/img/favicon.ico">
+		<link rel="apple-touch-icon-precomposed" href="/apps/theme-polybox/core/img/favicon-touch.png">
+		<link rel="mask-icon" sizes="any" href="/core/img/favicon-mask.svg" color="#1d2d44">
+					<link rel="stylesheet" href="/core/vendor/select2/select2.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/styles.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/inputs.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/header.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/icons.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/fonts.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/apps.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/global.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/fixes.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/multiselect.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/mobile.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/vendor/jquery-ui/themes/base/jquery-ui.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/jquery-ui-fixes.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/tooltip.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/share.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/files_versions/css/versions.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/files_pdfviewer/css/style.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/core/css/jquery.ocdialog.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/richdocuments/css/viewer/odfviewer.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/files_sharing/css/public.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/files_sharing/css/mobile.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/files/css/files.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/files/css/upload.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/theme-polybox/core/css/styles.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/theme-polybox/core/css/header.css?v=26be1f912bf13a3a37964df2a0b48c55">
+					<link rel="stylesheet" href="/apps/theme-polybox/core/css/apps.css?v=26be1f912bf13a3a37964df2a0b48c55">
+									<script src="/index.php/core/js/oc.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/jquery/dist/jquery.min.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/jquery-migrate/jquery-migrate.min.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/jquery-ui/ui/jquery-ui.custom.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/underscore/underscore.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/moment/min/moment-with-locales.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/handlebars/handlebars.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/blueimp-md5/js/md5.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/bootstrap/js/tooltip.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/backbone/backbone.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/es6-promise/dist/es6-promise.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/davclient.js/lib/client.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/clipboard/dist/clipboard.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/bowser/src/bowser.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/jquery.ocdialog.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/oc-dialogs.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/js.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/l10n.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/octemplate.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/eventsource.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/config.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/search/js/search.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/oc-requesttoken.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/apps.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/mimetype.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/mimetypelist.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/snapjs/dist/latest/snap.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/vendor/select2/select2.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/oc-backbone.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/oc-backbone-webdav.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/guests/js/app.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/shareconfigmodel.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharemodel.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharescollection.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/shareitemmodel.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharedialogresharerinfoview.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharedialoglinklistview.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharedialoglinkshareview.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharedialogmailview.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharedialoglinksocialview.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharedialogexpirationview.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharedialogshareelistview.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/sharedialogview.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/share.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files_pdfviewer/js/previewplugin.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/files/fileinfo.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/core/js/files/client.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/federatedfilesharing/js/public.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/richdocuments/js/viewer/viewer.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/file-upload.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files_sharing/js/public.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/fileactions.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/fileactionsmenu.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/jquery.fileupload.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/filesummary.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/breadcrumb.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/fileinfomodel.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/newfilemenu.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/files.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/filelist.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+					<script src="/apps/files/js/keyboardshortcuts.js?v=26be1f912bf13a3a37964df2a0b48c55"></script>
+				<meta property="og:title" content="polybox - &lt;a href=&quot;https://polybox.ethz.ch/documentation/FAQ/&quot; target=&quot;_blank&quot;&gt;Hilfe zu polybox&lt;/a&gt;&lt;br&gt;Use it as a logical memory stick&lt;br&gt;Store your data on the ETH campus"/><meta property="og:description" content="models is publicly shared"/><meta property="og:site_name" content="polybox"/><meta property="og:url" content="https://www.polybox.ethz.ch/index.php/s/90OlHg6KWBzG6gR"/><meta property="og:type" content="object"/><meta property="og:image" content="https://www.polybox.ethz.ch/core/img/favicon-fb.png"/>	</head>
+	<body id="body-public">
+		<noscript>
+	<div id="nojavascript">
+		<div>
+			This application requires JavaScript for correct operation. Please <a href="http://enable-javascript.com/" target="_blank" rel="noreferrer">enable JavaScript</a> and reload the page.		</div>
+	</div>
+</noscript>
+		
+
+<div id="notification-container">
+	<div id="notification" style="display: none;"></div>
+</div>
+
+<input type="hidden" id="filesApp" name="filesApp" value="1">
+<input type="hidden" id="isPublic" name="isPublic" value="1">
+<input type="hidden" name="dir" value="/" id="dir">
+<input type="hidden" name="downloadURL" value="https://www.polybox.ethz.ch/index.php/s/90OlHg6KWBzG6gR/download" id="downloadURL">
+<input type="hidden" name="sharingToken" value="90OlHg6KWBzG6gR" id="sharingToken">
+<input type="hidden" name="filename" value="models" id="filename">
+<input type="hidden" name="mimetype" value="httpd/unix-directory" id="mimetype">
+<input type="hidden" name="previewSupported" value="false" id="previewSupported">
+<input type="hidden" name="mimetypeIcon" value="/core/img/filetypes/folder.svg" id="mimetypeIcon">
+<input type="hidden" name="filesize" value="1196191200" id="filesize">
+<input type="hidden" name="maxSizeAnimateGif" value="10" id="maxSizeAnimateGif">
+
+<header>
+	<div id="header" class="share-folder" data-protected="false"
+		 data-owner-display-name="Yukun Dai (yudai@student.ethz.ch)" data-owner="yudai" data-name="models">
+		<a href="/index.php" title="" id="owncloud">
+			<h1 class="logo-icon">
+				polybox			</h1>
+		</a>
+
+		<div id="logo-claim" style="display:none;"></div>
+				<div class="header-right">
+			<span id="details">
+				<a href="https://www.polybox.ethz.ch/index.php/s/90OlHg6KWBzG6gR/download" id="download" class="button">
+					<img class="svg" alt="" src="/core/img/actions/download.svg"/>
+					<span id="download-text">Download</span>
+				</a>
+			</span>
+		</div>
+			</div>
+</header>
+<div id="content-wrapper">
+	<div id="content">
+		<div id="preview">
+							<div id="controls">
+		<div class="actions creatable hidden">
+			<div id="uploadprogresswrapper">
+				<div id="uploadprogressbar">
+					<em class="label outer" style="display:none"><span class="desktop">Uploading...</span><span class="mobile">...</span></em>
+				</div>
+				<input type="button" class="stop icon-close" style="display:none" value="" />
+			</div>
+		</div>
+		<div id="file_action_panel"></div>
+		<div class="notCreatable notPublic hidden">
+			You don’t have permission to upload or create files here		</div>
+		<input type="hidden" name="permissions" value="" id="permissions">
+	<input type="hidden" id="free_space" value="INF">
+		<input type="hidden" id="publicUploadRequestToken" name="requesttoken" value="MgQsK2wWHyEbZmh9L1p9TBcCBwxxaAQGNQYHOQwPDFM=:jFui4YPSI+ZEL9N9NrJfZ2jhqW4LVbHjsESZW0T1uII=" />
+	<input type="hidden" id="dirToken" name="dirToken" value="90OlHg6KWBzG6gR" />
+		<input type="hidden" class="max_human_file_size"
+		   value="(max INF PB)">
+</div>
+
+<div id="emptycontent" class="hidden">
+	<div class="icon-folder"></div>
+	<h2>No files in here</h2>
+	<p class="uploadmessage hidden">Upload some content or sync with your devices!</p>
+</div>
+
+<div class="nofilterresults emptycontent hidden">
+	<div class="icon-search"></div>
+	<h2>No entries found in this folder</h2>
+	<p></p>
+</div>
+
+<table id="filestable" data-allow-public-upload="no" data-preview-x="32" data-preview-y="32">
+	<thead>
+		<tr>
+			<th id='headerName' class="hidden column-name">
+				<div id="headerName-container">
+					<input type="checkbox" id="select_all_files" class="select-all checkbox"/>
+					<label for="select_all_files">
+						<span class="hidden-visually">Select all</span>
+					</label>
+					<a class="name sort columntitle" data-sort="name"><span>Name</span><span class="sort-indicator"></span></a>
+					<span id="selectedActionsList" class="selectedActions">
+						<a href="" class="download">
+							<span class="icon icon-download"></span>
+							<span>Download</span>
+						</a>
+					</span>
+				</div>
+			</th>
+			<th id="headerSize" class="hidden column-size">
+				<a class="size sort columntitle" data-sort="size"><span>Size</span><span class="sort-indicator"></span></a>
+			</th>
+			<th id="headerDate" class="hidden column-mtime">
+				<a id="modified" class="columntitle" data-sort="mtime"><span>Modified</span><span class="sort-indicator"></span></a>
+					<span class="selectedActions"><a href="" class="delete-selected">
+						<span>Delete</span>
+						<span class="icon icon-delete"></span>
+					</a></span>
+			</th>
+		</tr>
+	</thead>
+	<tbody id="fileList">
+	</tbody>
+	<tfoot>
+	</tfoot>
+</table>
+<input type="hidden" name="dir" id="dir" value="" />
+<div class="hiddenuploadfield">
+	<input type="file" id="file_upload_start" class="hiddenuploadfield" name="files[]" />
+</div>
+<div id="editor"></div><!-- FIXME Do not use this div in your app! It is deprecated and will be removed in the future! -->
+<div id="uploadsize-message" title="Upload too large">
+	<p>
+	The files you are trying to upload exceed the maximum size for file uploads on this server.	</p>
+</div>
+					</div>
+	</div>
+	<footer>
+		<p class="info">
+			© 2020 <a href="https://www.ethz.ch" target="_blank">ETH Zürich</a><br/><a href="https://polybox.ethz.ch/documentation/FAQ/" target="_blank">Hilfe zu polybox</a><br>Use it as a logical memory stick<br>Store your data on the ETH campus		</p>
+	</footer>
+</div>
+	</body>
+</html>
