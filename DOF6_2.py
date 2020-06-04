@@ -43,8 +43,11 @@ class Tobi_model(nn.Module):
         self.Res_5 = res_5()
         self.Res_5_2 = res_5_2()
         self.ELU = nn.ELU()
+<<<<<<< HEAD
         self.rnn = nn.LSTM(input_size=int(4096), hidden_size=1000, num_layers=2, batch_first=True)
         self.rnn_2 = nn.LSTM(input_size=int(4096), hidden_size=1000, num_layers=1, batch_first=True)
+
+>>>>>>> aa1ca984c243fe8e22b61377f7bf299322133ea0
         self.fc1 = nn.Linear(1000, 1024)
         self.fc2 = nn.Linear(2048, 1024)
         self.fc3 = nn.Linear(1024, 1024)
@@ -102,7 +105,6 @@ class Tobi_model(nn.Module):
         out_con = torch.cat([out_1,out_2,out_3,out_4,out_5], dim = 0)
         loss = my_loss(out_con, y)
         return loss \
-
 
 ## ResNet Block
 class ResNet(nn.Module):
@@ -273,7 +275,7 @@ class loss_cal(nn.Module):
             pass
 
 
-
+print('before concat sample')
 ###############################
 ## test tensor concat sample ##
 ###############################
@@ -314,12 +316,15 @@ loss_ = loss_cal(label)
 #         fin_out_ = torch.cat([pre_out_,out_],dim=0)
 #         print(fin_out_.size()) 
 
+print('before Tobi model')
+
 # tobiVO = Tobi_model().to('cpu')
 tobiVO = Tobi_model()
 cal_loss = 0
 #torch.save(tobiVO,'./modelsize')
 # print(tobiVO.eval())
 # summary(tobiVO,input_size=(3,256,192),device='cpu')
+<<<<<<< HEAD
 optimizer = optim.Adam(tobiVO.parameters(), lr=0.001)
 for i in range(input__.size()[0] - 6):
     optimizer.zero_grad()
@@ -332,3 +337,5 @@ for i in range(input__.size()[0] - 6):
     del new_input
             
     
+=======
+>>>>>>> aa1ca984c243fe8e22b61377f7bf299322133ea0
