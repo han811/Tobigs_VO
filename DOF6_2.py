@@ -1,3 +1,4 @@
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -7,7 +8,6 @@ import torch.utils as utils
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
-from torchsummary import summary
 
 def pose_loss(output_1,output_2, target_1, target_2):
 
@@ -43,8 +43,8 @@ class Tobi_model(nn.Module):
         self.Res_5 = res_5()
         self.Res_5_2 = res_5_2()
         self.ELU = nn.ELU()
-        self.rnn = nn.LSTM(input_size=int(98304/4), hidden_size=1000, num_layers=2, batch_first=True)
-        self.rnn_2 = nn.LSTM(input_size=int(98304/4), hidden_size=1000, num_layers=1, batch_first=True)
+        self.rnn = nn.LSTM(input_size=int(4096), hidden_size=1000, num_layers=2, batch_first=True)
+        self.rnn_2 = nn.LSTM(input_size=int(4096), hidden_size=1000, num_layers=1, batch_first=True)
         self.fc1 = nn.Linear(1000, 1024)
         self.fc2 = nn.Linear(2048, 1024)
         self.fc3 = nn.Linear(1024, 1024)
@@ -52,8 +52,9 @@ class Tobi_model(nn.Module):
         self.final_2 = nn.Linear(1024, 4)
 
     def forward(self, x):
-        x_1 = x[0].unsqueeze(0)  # t-1  step
-        x_2 = x[1].unsqueeze(0) # t step
+
+        x_1 = x[0,:].unsqueeze(0)  # t-1  step
+        x_2 = x[1,:].unsqueeze(0) # t step
         
         #Residual block pass 
         x_1 = self.Res(x_1) 
@@ -91,7 +92,16 @@ class Tobi_model(nn.Module):
         return out
 
     # def forward(self, x)
-
+    def get_loss(self, x, y):
+        with torch.no_grad():
+            out_1 = self.forward(torch.cat([x[0],x[1]],dim = 0))
+            out_2 = self.forward(torch.cat([x[1],x[2]],dim = 0))
+            out_3 = self.forward(torch.cat([x[2],x[3]],dim = 0))
+            out_4 = self.forward(torch.cat([x[3],x[4]],dim = 0))
+        out_5 = self.forward(torch.cat([x[4],x[5]],dim = 0))
+        out_con = torch.cat([out_1,out_2,out_3,out_4,out_5], dim = 0)
+        loss = my_loss(out_con, y)
+        return loss \
 
 
 ## ResNet Block
@@ -189,7 +199,7 @@ class ResNet_5(nn.Module):
     def forward(self, x):
         out = self.layer1_(x)
         out = self.ELU(out)
-        out = nn.functional.avg_pool2d(out, 8)
+        out = nn.functional.avg_pool2d(out, 16)
         out = out.view(1,out.size(0), -1)
         # out = self.linear(out)
         return out
@@ -216,7 +226,7 @@ class ResNet_5_2(nn.Module):
     def forward(self, x):
         out = self.layer1_(x)
         out = self.ELU(out)
-        out = nn.functional.avg_pool2d(out, 8)
+        out = nn.functional.avg_pool2d(out, 16)
         out = out.view(1,out.size(0), -1)
         # out = self.linear(out)
         return out
@@ -246,7 +256,8 @@ class loss_cal(nn.Module):
     def add_loss(self, out_):
         for i in range(5):
             if i!=4:
-                self.out_tensor[i] = self.out_tensor[i+1]
+                with torch.no_grad():
+                    self.out_tensor[i] = self.out_tensor[i+1]
             else:
                 # print(out_.size())
                 self.out_tensor[i] = out_
@@ -255,7 +266,7 @@ class loss_cal(nn.Module):
     def calculate_loss(self, out__):
         if self.num>=5:
             self.add_loss(out__)
-            loss = my_loss(self.out_tensor,self.label[self.num:self.num+5,:])
+            loss = my_loss(self.out_tensor,self.label[self.num-4:self.num+1,:])
             return loss
         else:
             self.add_loss(out__)
@@ -268,7 +279,7 @@ class loss_cal(nn.Module):
 ###############################
 data_size = 64
 batch_size = 1
-input = torch.rand(data_size,1,3,256,192)
+input__ = Variable(torch.ones(data_size,1,3,256,192),requires_grad=False)
 # input = input.int()
 
 resnet1_4 = ResNet50()
@@ -306,26 +317,18 @@ loss_ = loss_cal(label)
 # tobiVO = Tobi_model().to('cpu')
 tobiVO = Tobi_model()
 cal_loss = 0
-torch.save(tobiVO,'./modelsize')
+#torch.save(tobiVO,'./modelsize')
 # print(tobiVO.eval())
 # summary(tobiVO,input_size=(3,256,192),device='cpu')
-with torch.no_grad():
-    for i in range(input.size()[0]):
-        temp_loss = 0
-
-        if i>=1:
-            input_ = torch.cat([input[i-1],input[i]],dim=0)
-            finout = tobiVO.forward(input_)
-            # print(loss_.num)
-
-            if(loss_.num>=5):
-                # print('hi')
-                temp_loss = loss_.calculate_loss(finout)
-                cal_loss += temp_loss
-                print(cal_loss)
-            else:
-                loss_.calculate_loss(finout)
-        
+optimizer = optim.Adam(tobiVO.parameters(), lr=0.001)
+for i in range(input__.size()[0] - 6):
+    optimizer.zero_grad()
+    new_input = input__[0+i:6+i]
+    loss = tobiVO.get_loss(new_input,label[i+1:i+6])
+    loss.backward(retain_graph = True)
+    optimizer.step()
+    print(loss)
+    del loss
+    del new_input
+            
     
-
-
