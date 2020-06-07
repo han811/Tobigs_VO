@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import torch.nn.init as init
 from tobi_util import ResNet, Bottleneck, ResNet_5, ResNet_5_2
 from config import resnet_blk as r
-
+ 
 ################################
 ##### tobi model structure #####
 ################################
