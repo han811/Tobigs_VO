@@ -101,7 +101,7 @@ class Tobi_model(nn.Module):
         out_5 = self.forward(torch.cat([x[4],x[5]],dim = 0))
         out_con = torch.cat([out_1,out_2,out_3,out_4,out_5], dim = 0)
         loss = my_loss(out_con, y)
-        return loss \
+        return loss
 
 
 ## ResNet Block
