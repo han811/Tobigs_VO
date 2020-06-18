@@ -1,7 +1,0 @@
-<launch>
-
-  <node name="save_img" pkg="vo" type="save_data.py" output="screen">
-    <param name="im_topic" type="string" value="/camera/color/image_raw"/>
-  </node>
-
-</launch>
