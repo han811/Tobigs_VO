@@ -2,7 +2,7 @@ import os
 import glob
 import numpy as np
 import time
-from helper import R_to_quaternion
+from helper import R_to_angle
 from params import par
 from torchvision import transforms
 from PIL import Image
@@ -52,7 +52,7 @@ def create_pose_data():
 		print('Transforming {}...'.format(fn))
 		with open(fn) as f:
 			lines = [line.split('\n')[0] for line in f.readlines()] 
-			poses = [ R_to_quaternion([float(value) for value in l.split(' ')]) for l in lines]  # list of pose (pose=list of 12 floats)
+			poses = [ R_to_angle([float(value) for value in l.split(' ')]) for l in lines]  # list of pose (pose=list of 12 floats)
 			poses = np.array(poses)
 			base_fn = os.path.splitext(fn)[0]
 			np.save(base_fn+'.npy', poses)
