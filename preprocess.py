@@ -2,7 +2,7 @@ import os
 import glob
 import numpy as np
 import time
-from helper import R_to_quaternion
+from data_helper import R_to_quaternion
 from params import par
 from torchvision import transforms
 from PIL import Image
@@ -25,6 +25,7 @@ def clean_unused_images():
 	for dir_id, img_ids in seq_frame.items():
 		dir_path = '{}{}/'.format(par.image_dir, dir_id)
 		if not os.path.exists(dir_path):
+			print('no dir_path')
 			continue
 
 		print('Cleaning {} directory'.format(dir_id))
@@ -68,7 +69,6 @@ def calculate_rgb_mean_std(image_path_list, minus_point_5=False):
 	mean_tensor = [0, 0, 0]
 	to_tensor = transforms.ToTensor()
 
-	image_sequence = []
 	for idx, img_path in enumerate(image_path_list):
 		print('{} / {}'.format(idx, n_images), end='\r')
 		img_as_img = Image.open(img_path)

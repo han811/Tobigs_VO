@@ -2,49 +2,51 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 import os
-from data_helper import get_data_info_tobi, SortedRandomBatchSampler, ImageSequenceDataset, ImageSequenceDataset2
+from data_helper import get_data_info_tobi, ImageSequenceDataset, ImageSequenceDataset_visual
 from params import par
 
+########################
+### variable setting ###
+########################
 
-train_df = get_data_info_tobi(folder_list=par.train_video, seq_len_range=par.seq_len, overlap=5, sample_times=par.sample_times)	
-# valid_df = get_data_info_tobi(folder_list=par.valid_video, seq_len_range=par.seq_len, overlap=5, sample_times=par.sample_times)
-train_sampler = SortedRandomBatchSampler(train_df, par.batch_size, drop_last=True)
-train_dataset = ImageSequenceDataset2(train_df, par.resize_mode, (par.img_w, par.img_h), par.img_means, par.img_stds, par.minus_point_5)
+pose_GT_dir = par.pose_dir  #'KITTI/pose_GT/'
+predicted_result_dir = os.getcwd()+'/image/'
+predict_path = os.getcwd()+'/result/'
 
-# translation y z x order
-def plot_route(gt, out, c_gt='g', c_out='r'):
-	x_idx = 2
-	y_idx = 0
-	x = []
-	y = []
-	for i in range(len(gt)):
-	# for i in range(100):
-		if i%20==0:
-			for j in range(6):
-				x += [gt[i][2][j][x_idx].tolist()]
-				y += [gt[i][2][j][y_idx].tolist()]
-		print(i)
-	plt.plot(x, y, color=c_gt, label='label')
+train_df = get_data_info_tobi(folder_list=par.train_video, overlap=False)	
+train_dataset = ImageSequenceDataset(train_df, par.resize_mode, (par.img_w, par.img_h), par.img_means, par.img_stds, par.minus_point_5)
+train_dataset_gt = ImageSequenceDataset_visual(train_df, par.resize_mode, (par.img_w, par.img_h), par.img_means, par.img_stds, par.minus_point_5)
+	
+x_idx = 2
+y_idx = 0
 
-	x = []
-	y = []
-	tempx = 0
-	tempy = 0
-	for i in range(len(predict)):
-		tempx += out[i][x_idx]
-		tempy += out[i][y_idx]
-		x += [tempx]
-		y += [tempy]
-	plt.plot(x, y, color=c_out, label='predict')
-	plt.gca().set_aspect('equal', adjustable='datalim')
+############################
+### variable setting end ###
+############################
 
-predict = []
-# predict_path = os.getcwd()+'/result/x_predict.npy'
-# predict = np.load(predict_path)
-plt.clf()
-plot_route(train_dataset, predict, 'r', 'b')
-plt.legend()
-plt.title('result')
-save_name = 'image/result_img'
-plt.savefig(save_name)
+def plot_route(gt, c_gt='g', c_out='r'):
+	x = [v for v in gt[:, x_idx]]
+	y = [v for v in gt[:, y_idx]]
+	plt.plot(x, y, color=c_gt, label='Ground Truth')
+	plt.savefig(predicted_result_dir+str(video))
+	# plt.show()
 
+def plot_route_predict(out, c_gt='g', c_out='r'):
+	x_temp=0
+	y_temp=0
+	x = [v+x_temp for v in out[:, x_idx]]
+	y = [v+y_temp for v in out[:, y_idx]]
+	plt.plot(x, y, color=c_out, label='Predict')
+	plt.savefig(predicted_result_dir+'predict')
+
+if __name__=='__main__':
+	# Load in GT and predicted pose
+	video_list = ['00']
+	for video in video_list:
+		predict = np.load(predict_path+'x_predict.npy')
+		GT_pose_path = '{}{}.npy'.format(pose_GT_dir, video)
+		gt = np.load(GT_pose_path)
+		plot_route(gt, c_gt='g', c_out='r')
+		plt.close()
+		plot_route_predict(predict, c_gt='g', c_out='r')
+		plt.close()
