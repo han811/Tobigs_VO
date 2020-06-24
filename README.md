@@ -2,8 +2,6 @@
 
 ## PyTorch Implementation of Deep Global- Relative Networks for End-to-End 6-DoF Visual Localization and Odometry
 
-## dataset부분은
-
 ### 사용법 
 1. 구글드라이브에서 KITTI Dataset을 다운받는다.
 2. preprocess.py를 돌립니다.
