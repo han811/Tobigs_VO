@@ -226,6 +226,7 @@ def my_loss(out,tar):
     loss += now_loss(out[2],tar[2])
     loss += now_loss(out[3],tar[3])
     loss += now_loss(out[4],tar[4])
+    loss = loss*100
     return loss
     # loss += self.pose_loss(out[0],out[1],tar[0],tar[1])
     # loss += self.pose_loss(out[1],out[2],tar[1],tar[2])

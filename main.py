@@ -19,15 +19,17 @@ from data_helper import get_data_info_tobi, ImageSequenceDataset
 from torch.utils.tensorboard import SummaryWriter
 
 
-train=True
-gpu=False
+train=False
+gpu=True
+load=False
+
 predict_path = os.getcwd()+'/result/'
 model_path = os.getcwd()+'/weight'
 log_path = os.getcwd()+'/log'
 
 writer = SummaryWriter(log_path)
 
-test_num=10
+test_num=756
 
 
 # should fix for when batch != 1
@@ -104,7 +106,8 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
             out_4 = model(torch.cat([input_[3],input_[4]],dim=0))
             out_5 = model(torch.cat([input_[4],input_[5]],dim=0))
             out_con = torch.cat([out_1,out_2,out_3,out_4,out_5],dim=0)
-            
+            # print(out_con)
+            # print(label_[1:6])
             loss = loss + my_loss(out_con, label_[1:6])
             # print(loss)
             if((i>=batch-1) and ((i+1)%batch==0)):
@@ -112,7 +115,7 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
                 sum_loss += loss.item()
                 loss.backward(retain_graph=True)
                 optimizer.step()
-                print('{} / {} || epoch : {} || loss : {}'.format((i+1)//batch, n, j+1, loss))
+                print('{} / {} || epoch : {} || loss : {}'.format((i+1), n, j+1, loss))
                 loss = 0
             # optimizer.zero_grad()
             # loss.backward(retain_graph=True)
@@ -136,9 +139,11 @@ if __name__ == "__main__":
         else:
             tobiVO = Tobi_model().cuda()
         # optimizer = optim.Adam(tobiVO.parameters(), lr=0.0001)
-        optimizer = optim.Adam(tobiVO.parameters(), lr=0.00001)
+        if load==True:
+            tobiVO.load_state_dict(torch.load(model_path+'/modelsize5.pth')) # setting plz
+        optimizer = optim.Adam(tobiVO.parameters(), lr=0.0001)
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=400, gamma=0.5)
-        run(model=tobiVO,data=train_dataset,batch=2,optimizer=optimizer,epoch=20,scheduler=scheduler)
+        run(model=tobiVO,data=train_dataset,batch=1,optimizer=optimizer,epoch=2000,scheduler=scheduler)
     else:
         if gpu==False:
             tobiVO = Tobi_model()
@@ -153,21 +158,35 @@ if __name__ == "__main__":
         a = np.array([0])
         for i in range(test_num):
             if gpu==False:
-                input_ = torch.FloatTensor(train_dataset[i][1])
+                input_ = torch.FloatTensor(train_dataset[i][0])
                 input_ = torch.reshape(input_,(6,1,3,224,224))
                 input_.requires_grad=False
+
+                for j in range(5):
+                    if(i==0 and j==0):
+                        answer = tobiVO.forward(torch.cat([input_[j],input_[j+1]],dim = 0))
+                        answer = answer.detach()
+                        a = answer.numpy()
+                    else:
+                        answer = tobiVO.forward(torch.cat([input_[j],input_[j+1]],dim = 0))
+                        answer = answer.detach()
+                        a = np.concatenate((a, answer.numpy()), axis=0)
+                print('{} / {} '.format(i, test_num))
+
             else:
-                input_ = torch.FloatTensor(train_dataset[i][1]).cuda()
+                input_ = torch.FloatTensor(train_dataset[i][0]).cuda()
                 input_ = torch.reshape(input_,(6,1,3,224,224)).cuda()
                 input_.requires_grad=False
-            for j in range(5):
-                if(i==0 and j==0):
-                    answer = tobiVO.forward(torch.cat([input_[j],input_[j+1]],dim = 0))
-                    answer = answer.detach()
-                    a = answer.numpy()
-                else:
-                    answer = tobiVO.forward(torch.cat([input_[j],input_[j+1]],dim = 0))
-                    answer = answer.detach()
-                    a = np.concatenate((a, answer.numpy()), axis=0)
-            print('{} / {} '.format(i, test_num))
+                for j in range(5):
+                    if(i==0 and j==0):
+                        answer = tobiVO.forward(torch.cat([input_[j],input_[j+1]],dim = 0))
+                        answer = answer.detach()
+                        answer = answer.cpu()
+                        a = answer.numpy()
+                    else:
+                        answer = tobiVO.forward(torch.cat([input_[j],input_[j+1]],dim = 0))
+                        answer = answer.detach()
+                        answer = answer.cpu()
+                        a = np.concatenate((a, answer.numpy()), axis=0)
+                print('{} / {} '.format(i, test_num))
         np.save(predict_path+'x_predict.npy',a)

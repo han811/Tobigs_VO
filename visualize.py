@@ -27,6 +27,9 @@ y_idx = 0
 def plot_route(gt, c_gt='g', c_out='r'):
 	x = [v for v in gt[:, x_idx]]
 	y = [v for v in gt[:, y_idx]]
+	print(x[0:20])
+	print(y[0:20])
+
 	plt.plot(x, y, color=c_gt, label='Ground Truth')
 	plt.savefig(predicted_result_dir+str(video))
 	# plt.show()
@@ -34,8 +37,23 @@ def plot_route(gt, c_gt='g', c_out='r'):
 def plot_route_predict(out, c_gt='g', c_out='r'):
 	x_temp=0
 	y_temp=0
-	x = [v+x_temp for v in out[:, x_idx]]
-	y = [v+y_temp for v in out[:, y_idx]]
+	x=[]
+	y=[]
+	print(out.shape)
+	for i in range(out.shape[0]):
+		x_temp+=out[i][x_idx] #/100
+		y_temp+=out[i][y_idx] #/100
+		x+=[x_temp]
+		y+=[y_temp]
+
+	# x = [v+x_temp for v in out[:, x_idx]]
+	# y = [v+y_temp for v in out[:, y_idx]]
+	print(sum(x[0:20]))
+	print(sum(y[0:20]))
+	print(y[0:20])
+	# x /= 100
+	# y /= 100
+
 	plt.plot(x, y, color=c_out, label='Predict')
 	plt.savefig(predicted_result_dir+'predict')
 
