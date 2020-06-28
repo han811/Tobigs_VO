@@ -90,7 +90,8 @@ class ImageSequenceDataset(Dataset):
         self.groundtruth_arr = np.array(self.data_info.pose)
 
     def __getitem__(self, index):
-        groundtruth_sequence = self.groundtruth_arr[index]
+        groundtruth_sequence = (self.groundtruth_arr[index]).copy()
+        
         temp = np.ones((6,3))
         for i in range(6):
             for j in range(3):

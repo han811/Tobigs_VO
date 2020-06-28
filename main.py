@@ -20,7 +20,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 
 train=True
-gpu=True
+gpu=False
 load=False
 
 predict_path = os.getcwd()+'/result/'
@@ -35,7 +35,8 @@ test_num=756
 # should fix for when batch != 1
 def run(model,data,optimizer,epoch,scheduler,batch=1):
     best_val = 10**8
-    n = len(data)//batch
+    n = 2
+    # n = len(data)//batch
     # r = len(data)%batch
     loss = 0
     for j in range(epoch):
@@ -43,7 +44,7 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
         for i in range(n):
             if gpu==False:
                 input_ = torch.FloatTensor(data[i][0])
-                input_.requires_grad=True
+                input_.requires_grad=False
                 input_ = torch.reshape(input_,(6,1,3,224,224))
                 label_ = torch.FloatTensor(data[i][1])
 
@@ -72,7 +73,7 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
                     # print(input_.size())
             else:
                 input_ = torch.FloatTensor(data[i][0])
-                input_.requires_grad=True
+                input_.requires_grad=False
                 input_ = torch.reshape(input_,(6,1,3,224,224)).cuda()
                 label_ = torch.FloatTensor(data[i][1]).cuda()
 
@@ -100,23 +101,25 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
                 #             label_temp = torch.FloatTensor(data[i*batch+k][1]).cuda()
                 #             label_ = torch.cat([label_,label_temp],dim=0).cuda()
             # loss = model.get_loss(input_,label_[1:6])
+            # input_.requires_grad = False
             out_1 = model(torch.cat([input_[0],input_[1]],dim=0))
             out_2 = model(torch.cat([input_[1],input_[2]],dim=0))
             out_3 = model(torch.cat([input_[2],input_[3]],dim=0))
             out_4 = model(torch.cat([input_[3],input_[4]],dim=0))
             out_5 = model(torch.cat([input_[4],input_[5]],dim=0))
             out_con = torch.cat([out_1,out_2,out_3,out_4,out_5],dim=0)
-            # print(out_con)
-            # print(label_[1:6])
+            
             loss = loss + my_loss(out_con, label_[1:6])
-            # print(loss)
+            
             if((i>=batch-1) and ((i+1)%batch==0)):
-                optimizer.zero_grad()
                 sum_loss += loss.item()
+                # loss.backward()
                 loss.backward(retain_graph=True)
                 optimizer.step()
+                optimizer.zero_grad()
                 print('{} / {} || epoch : {} || loss : {}'.format((i+1), n, j+1, loss))
                 loss = 0
+            
             # optimizer.zero_grad()
             # loss.backward(retain_graph=True)
 
@@ -130,9 +133,9 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
         torch.save(tobiVO.state_dict(),model_path+'/modelsize'+str(j)+'.pth')
 
 if __name__ == "__main__":
-    gpu_num = 3
-    device = torch.device(f'cuda:{gpu_num}' if torch.cuda.is_available() else 'cpu')
-    torch.cuda.set_device(device)
+    # gpu_num = 3
+    # device = torch.device(f'cuda:{gpu_num}' if torch.cuda.is_available() else 'cpu')
+    # torch.cuda.set_device(device)
 
 
     train_df = get_data_info_tobi(folder_list=par.train_video, overlap=False, pad_y=False, shuffle=False)	
@@ -148,7 +151,7 @@ if __name__ == "__main__":
             tobiVO.load_state_dict(torch.load(model_path+'/modelsize5.pth')) # setting plz
         optimizer = optim.Adam(tobiVO.parameters(), lr=0.0001)
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=400, gamma=0.5)
-        run(model=tobiVO,data=train_dataset,batch=1,optimizer=optimizer,epoch=2000,scheduler=scheduler)
+        run(model=tobiVO,data=train_dataset,batch=2,optimizer=optimizer,epoch=2000,scheduler=scheduler)
     else:
         if gpu==False:
             tobiVO = Tobi_model()
