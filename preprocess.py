@@ -2,7 +2,7 @@ import os
 import glob
 import numpy as np
 import time
-from data_helper import R_to_quaternion
+from helper import R_to_angle
 from params import par
 from torchvision import transforms
 from PIL import Image
@@ -13,19 +13,12 @@ def clean_unused_images():
 	seq_frame = {'00': ['000', '004540'],
 				'01': ['000', '001100'],
 				'02': ['000', '004660'],
-				'03': ['000', '000800'],
 				'04': ['000', '000270'],
-				'05': ['000', '002760'],
-				'06': ['000', '001100'],
-				'07': ['000', '001100'],
-				'08': ['001100', '005170'],
-				'09': ['000', '001590'],
 				'10': ['000', '001200']
 				}
 	for dir_id, img_ids in seq_frame.items():
 		dir_path = '{}{}/'.format(par.image_dir, dir_id)
 		if not os.path.exists(dir_path):
-			print('no dir_path')
 			continue
 
 		print('Cleaning {} directory'.format(dir_id))
@@ -46,14 +39,14 @@ def clean_unused_images():
 # transform poseGT [R|t] to [theta_x, theta_y, theta_z, x, y, z]
 # save as .npy file
 def create_pose_data():
-	info = {'00': [0, 4540], '01': [0, 1100], '02': [0, 4660], '03': [0, 800], '04': [0, 270], '05': [0, 2760], '06': [0, 1100], '07': [0, 1100], '08': [1100, 5170], '09': [0, 1590], '10': [0, 1200]}
+	info = {'00': [0, 4540], '01': [0, 1100], '02': [0, 4660],  '04': [0, 270], '10': [0, 1200]}
 	start_t = time.time()
 	for video in info.keys():
 		fn = '{}{}.txt'.format(par.pose_dir, video)
 		print('Transforming {}...'.format(fn))
 		with open(fn) as f:
 			lines = [line.split('\n')[0] for line in f.readlines()] 
-			poses = [ R_to_quaternion([float(value) for value in l.split(' ')]) for l in lines]  # list of pose (pose=list of 12 floats)
+			poses = [ R_to_angle([float(value) for value in l.split(' ')]) for l in lines]  # list of pose (pose=list of 12 floats)
 			poses = np.array(poses)
 			base_fn = os.path.splitext(fn)[0]
 			np.save(base_fn+'.npy', poses)
@@ -69,6 +62,7 @@ def calculate_rgb_mean_std(image_path_list, minus_point_5=False):
 	mean_tensor = [0, 0, 0]
 	to_tensor = transforms.ToTensor()
 
+	image_sequence = []
 	for idx, img_path in enumerate(image_path_list):
 		print('{} / {}'.format(idx, n_images), end='\r')
 		img_as_img = Image.open(img_path)
