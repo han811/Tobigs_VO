@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from params import par
+from params_fr import par
 from torch.autograd import Variable
 from torch.nn.init import kaiming_normal_, orthogonal_
 import numpy as np

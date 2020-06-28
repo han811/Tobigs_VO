@@ -8,7 +8,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import Sampler
 from torchvision import transforms
 import time
-from params import par
+from params_fr import par
 from helper import normalize_angle_delta
 
 

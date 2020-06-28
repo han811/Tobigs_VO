@@ -1,5 +1,5 @@
 # predicted as a batch
-from params import par
+from params_fr import par
 from model_bilstm import DeepVO
 import numpy as np
 from PIL import Image

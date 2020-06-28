@@ -4,7 +4,7 @@
 # In[ ]:
 
 
-from params import par
+from params_fr import par
 from model import DeepVO
 import cv2
 import math

@@ -4,7 +4,7 @@ import numpy as np
 import os
 import time
 import pandas as pd
-from params import par
+from params_fr import par
 from model_unilstm import DeepVO
 from torch.utils.tensorboard import SummaryWriter
 # from tensorboardX import SummaryWriter
