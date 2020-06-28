@@ -19,7 +19,7 @@ from data_helper import get_data_info_tobi, ImageSequenceDataset
 from torch.utils.tensorboard import SummaryWriter
 
 
-train=False
+train=True
 gpu=True
 load=False
 
@@ -130,6 +130,11 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
         torch.save(tobiVO.state_dict(),model_path+'/modelsize'+str(j)+'.pth')
 
 if __name__ == "__main__":
+    gpu_num = 3
+    device = torch.device(f'cuda:{gpu_num}' if torch.cuda.is_available() else 'cpu')
+    torch.cuda.set_device(device)
+
+
     train_df = get_data_info_tobi(folder_list=par.train_video, overlap=False, pad_y=False, shuffle=False)	
     train_dataset = ImageSequenceDataset(train_df, par.resize_mode, (par.img_w, par.img_h), par.img_means, par.img_stds, par.minus_point_5)
 

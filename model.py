@@ -165,7 +165,9 @@ class Tobi_model(nn.Module):
 
         ####test####
         x_4 = self.test1(x_3)
+        x_4 = self.ELU(x_4)
         x_5 = self.test2(x_3)
+        x_5 = self.ELU(x_5)
 
         x_4 = self.final_1(x_4)
         x_5 = self.final_2(x_5)
@@ -214,13 +216,13 @@ def get_loss(x, y):
 
 def my_loss(out,tar):
     loss = 0
-    loss += pose_loss(out[0],out[1],tar[0],tar[1])
-    loss += pose_loss(out[1],out[2],tar[1],tar[2])
-    loss += pose_loss(out[2],out[3],tar[2],tar[3])
-    loss += pose_loss(out[3],out[4],tar[3],tar[4])
-    loss += pose_loss(out[0],out[2],tar[0],tar[2])
-    loss += pose_loss(out[2],out[4],tar[2],tar[4])
-    loss += pose_loss(out[0],out[4],tar[0],tar[4]) 
+    # loss += pose_loss(out[0],out[1],tar[0],tar[1])
+    # loss += pose_loss(out[1],out[2],tar[1],tar[2])
+    # loss += pose_loss(out[2],out[3],tar[2],tar[3])
+    # loss += pose_loss(out[3],out[4],tar[3],tar[4])
+    # loss += pose_loss(out[0],out[2],tar[0],tar[2])
+    # loss += pose_loss(out[2],out[4],tar[2],tar[4])
+    # loss += pose_loss(out[0],out[4],tar[0],tar[4]) 
     loss += now_loss(out[0],tar[0])
     loss += now_loss(out[1],tar[1])
     loss += now_loss(out[2],tar[2])
