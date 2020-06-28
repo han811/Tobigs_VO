@@ -3,7 +3,7 @@ import glob
 import numpy as np
 import time
 from helper import R_to_angle
-from params_fr import par
+from params import par
 from torchvision import transforms
 from PIL import Image
 import torch
@@ -13,7 +13,13 @@ def clean_unused_images():
 	seq_frame = {'00': ['000', '004540'],
 				'01': ['000', '001100'],
 				'02': ['000', '004660'],
+				'03': ['000', '000800'],
 				'04': ['000', '000270'],
+				'05': ['000', '002760'],
+				'06': ['000', '001100'],
+				'07': ['000', '001100'],
+				'08': ['001100', '005170'],
+				'09': ['000', '001590'],
 				'10': ['000', '001200']
 				}
 	for dir_id, img_ids in seq_frame.items():
@@ -39,7 +45,7 @@ def clean_unused_images():
 # transform poseGT [R|t] to [theta_x, theta_y, theta_z, x, y, z]
 # save as .npy file
 def create_pose_data():
-	info = {'00': [0, 4540], '01': [0, 1100], '02': [0, 4660],  '04': [0, 270], '10': [0, 1200]}
+	info = {'00': [0, 4540], '01': [0, 1100], '02': [0, 4660], '03': [0, 800], '04': [0, 270], '05': [0, 2760], '06': [0, 1100], '07': [0, 1100], '08': [1100, 5170], '09': [0, 1590], '10': [0, 1200]}
 	start_t = time.time()
 	for video in info.keys():
 		fn = '{}{}.txt'.format(par.pose_dir, video)
