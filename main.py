@@ -17,11 +17,24 @@ from params import par
 from data_helper import get_data_info_tobi, ImageSequenceDataset
 
 from torch.utils.tensorboard import SummaryWriter
+import argparse
+
+parser = argparse.ArgumentParser(description='python Implementation')
 
 
-train=True
-gpu=False
-load=False
+parser.add_argument('--gpu',type = bool, default = False)
+parser.add_argument('--batch',type = int, default=1)
+parser.add_argument('--train',type=bool, default= True)
+parser.add_argument('--load',type=bool, default= False)
+parser.add_argument('--lr', type=float, default=0.0001)
+args = parser.parse_args()
+
+print(args.gpu)
+
+train=args.train
+gpu=args.gpu
+load=args.load
+
 
 predict_path = os.getcwd()+'/result/'
 model_path = os.getcwd()+'/weight'
@@ -35,9 +48,8 @@ test_num=756
 # should fix for when batch != 1
 def run(model,data,optimizer,epoch,scheduler,batch=1):
     best_val = 10**8
-    n = 2
-    # n = len(data)//batch
-    # r = len(data)%batch
+    n = len(data)//batch
+    r = len(data)%batch
     loss = 0
     for j in range(epoch):
         sum_loss = 0
@@ -149,9 +161,9 @@ if __name__ == "__main__":
         # optimizer = optim.Adam(tobiVO.parameters(), lr=0.0001)
         if load==True:
             tobiVO.load_state_dict(torch.load(model_path+'/modelsize5.pth')) # setting plz
-        optimizer = optim.Adam(tobiVO.parameters(), lr=0.0001)
+        optimizer = optim.Adam(tobiVO.parameters(), lr=args.lr)
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=400, gamma=0.5)
-        run(model=tobiVO,data=train_dataset,batch=2,optimizer=optimizer,epoch=2000,scheduler=scheduler)
+        run(model=tobiVO,data=train_dataset,batch=args.batch,optimizer=optimizer,epoch=2000,scheduler=scheduler)
     else:
         if gpu==False:
             tobiVO = Tobi_model()
