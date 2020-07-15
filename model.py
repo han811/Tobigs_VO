@@ -100,9 +100,12 @@ class Tobi_model(nn.Module):
         self.Res = ResNet50()
         self.Res_5 = res_5()
         self.Res_5_2 = res_5_2()
-        self.ELU = nn.ELU()
-        self.rnn = nn.LSTM(input_size=r['rnn1']['input_size'], hidden_size=r['rnn1']['hidden_size'], num_layers=r['rnn1']['num_layers'], batch_first=r['rnn1']['batch_first'])
-        self.rnn_2 = nn.LSTM(input_size=r['rnn2']['input_size'], hidden_size=r['rnn2']['hidden_size'], num_layers=r['rnn2']['num_layers'], batch_first=r['rnn2']['batch_first'])
+        self.GELU = nn.GELU()
+        self.rnn = nn.LSTMCell(input_size=r['rnn1']['input_size'], hidden_size=r['rnn1']['hidden_size'])#, num_layers=r['rnn1']['num_layers'], batch_first=r['rnn1']['batch_first'],bidirectional=True)
+        self.rnn_2 = nn.LSTMCell(input_size=r['rnn2']['input_size'], hidden_size=r['rnn2']['hidden_size'])#, num_layers=r['rnn2']['num_layers'], batch_first=r['rnn2']['batch_first'], bidirectional=True)
+
+        # self.rnn = nn.LSTMCell(input_size=r['rnn1']['input_size'], hidden_size=r['rnn1']['hidden_size'])#, num_layers=r['rnn1']['num_layers'], batch_first=r['rnn1']['batch_first'],bidirectional=True)
+        # self.rnn_2 = nn.LSTMCell(input_size=r['rnn2']['input_size'], hidden_size=r['rnn2']['hidden_size'])#, num_layers=r['rnn2']['num_layers'], batch_first=r['rnn2']['batch_first'], bidirectional=True)
         self.fc1 = nn.Linear(r['fc1']['input'], r['fc1']['output']) # rcnn1
         self.fc2 = nn.Linear(r['fc2']['input'], r['fc2']['output']) # rcnn2
         self.fc3 = nn.Linear(r['fc3']['input'], r['fc3']['output']) # total
@@ -117,14 +120,19 @@ class Tobi_model(nn.Module):
         self.final_1 = nn.Linear(1024, 3) # translation
         self.final_2 = nn.Linear(1024, 4) # quaternion
 
+
         self.norm1 = nn.BatchNorm2d(3)
         self.norm2 = nn.BatchNorm2d(3)
 
         for m in self.modules():
             weight_init(m)
-
+        self.h_1 = torch.randn(5,500).cuda()
+        self.h_2 = torch.randn(5,500).cuda()
+        self.h_3 = torch.randn(5,500).cuda()
+        self.h_4 = torch.randn(5,500).cuda()
 
     def forward(self, x):
+    
         x_1 = x[1:,:]  # t-1  step
         x_2 = x[:-1,:] # t step
         # print("00",x_1.size())
@@ -137,7 +145,8 @@ class Tobi_model(nn.Module):
         #########################
         ###Residual block pass###
         ######################### 
-        x_1 = self.Res(x_1) 
+
+        x_1 = self.Res(x_1)
         x_2 = self.Res(x_2)
         # print("02",x_2.size())
 
@@ -147,23 +156,32 @@ class Tobi_model(nn.Module):
         x_3 = torch.cat([x_1,x_2],dim = 1)
         # print(x_3.size())
         x_3 = self.Res_5(x_3)
-        x_3 = x_3.view(1,5,2048)
+        # x_3 = x_3.view(1,5,2048)
+        x_3 = x_3.view(5,2048)
+
+
         # print(x_3.size())
-        x_3, _ = self.rnn(x_3)
-        x_3 = self.fc1(x_3)
-        x_3 = self.ELU(x_3)
+        # for i in range(5):
+        self.h_3, self.h_4 = self.rnn(x_3, (self.h_3, self.h_4))
+        # x_3 = self.h_3
+        # x_3 = self.fc1(x_3)
+        x_3 = self.fc1(self.h_3)
+        x_3 = self.GELU(x_3)
 
         ###########
         ###RCNN2###
         ###########
         x_2 = self.Res_5_2(x_2)
         # print("1",x_2.size())
-        x_2 = x_2.view(1,5,2048)
-        x_2, _ = self.rnn_2(x_2)
+        x_2 = x_2.view(5,2048)
+        self.h_1, self.h_2 = self.rnn_2(x_2, (self.h_1, self.h_2))
+
         # print("2",x_2.size())        
-        x_2 = self.fc2(x_2)
+        # x_2 = self.h_1
+        x_2 = self.fc2(self.h_1)
+        # x_2 = self.fc2(x_2)
         # print("3",x_2.size())
-        x_2 = self.ELU(x_2)
+        x_2 = self.GELU(x_2)
         # print("4",x_2.size())
 
         ##############
@@ -171,24 +189,26 @@ class Tobi_model(nn.Module):
         ##############
         # x_2 = x_2.view(1,r['fc1']['output'])
         # x_3 = x_3.view(1,r['fc2']['output'])
-        x_3 = torch.cat([x_2,x_3],dim = 2)
+        x_3 = torch.cat([x_2,x_3],dim = 1)
         x_3 = self.fc3(x_3)
-        x_3 = self.ELU(x_3)
+        x_3 = self.GELU(x_3)
 
 
         ####test####
         x_4 = self.test1(x_3)
-        x_4 = self.ELU(x_4)
+        x_4 = self.GELU(x_4)
         x_5 = self.test2(x_3)
-        x_5 = self.ELU(x_5)
+        x_5 = self.GELU(x_5)
 
+        # out = self.final_1(x_4)
         x_4 = self.final_1(x_4)
         x_5 = self.final_2(x_5)
         # print(x_4.size())
         # print(x_5.size())
-        out = torch.cat([x_4,x_5],dim=2)
-        out = out.view(5,7)
+        out = torch.cat([x_4,x_5],dim=1)
+        # out = out.view(5,7)
         return out
+
 
         # #Translation
         # print(x_3.size())
@@ -231,13 +251,13 @@ def get_loss(x, y):
 
 def my_loss(out,tar):
     loss = 0
-    # loss += pose_loss(out[0],out[1],tar[0],tar[1])
-    # loss += pose_loss(out[1],out[2],tar[1],tar[2])
-    # loss += pose_loss(out[2],out[3],tar[2],tar[3])
-    # loss += pose_loss(out[3],out[4],tar[3],tar[4])
-    # loss += pose_loss(out[0],out[2],tar[0],tar[2])
-    # loss += pose_loss(out[2],out[4],tar[2],tar[4])
-    # loss += pose_loss(out[0],out[4],tar[0],tar[4]) 
+    loss += pose_loss(out[0],out[1],tar[0],tar[1])
+    loss += pose_loss(out[1],out[2],tar[1],tar[2])
+    loss += pose_loss(out[2],out[3],tar[2],tar[3])
+    loss += pose_loss(out[3],out[4],tar[3],tar[4])
+    loss += pose_loss(out[0],out[2],tar[0],tar[2])
+    loss += pose_loss(out[2],out[4],tar[2],tar[4])
+    loss += pose_loss(out[0],out[4],tar[0],tar[4]) 
     # print("now_loss0 : ",now_loss(out[0],tar[0]))
     # print("now_loss1 : ",now_loss(out[1],tar[1]))
     # print("now_loss2 : ",now_loss(out[2],tar[2]))
@@ -248,7 +268,7 @@ def my_loss(out,tar):
     loss += now_loss(out[2],tar[2])
     loss += now_loss(out[3],tar[3])
     loss += now_loss(out[4],tar[4])
-    loss = loss*100
+    loss = loss
     return loss
     # loss += self.pose_loss(out[0],out[1],tar[0],tar[1])
     # loss += self.pose_loss(out[1],out[2],tar[1],tar[2])
@@ -265,10 +285,19 @@ def my_loss(out,tar):
     # return loss
 
 def pose_loss(output_1,output_2, target_1, target_2):
-    P = torch.dot(output_1, output_2)
-    P_truth = torch.dot(target_1, target_2)
-    loss = (P - P_truth)**2
+    P = torch.ger(output_1, output_2)
+    P_truth = torch.ger(target_1, target_2)
+
+    loss = torch.mean((P - P_truth)**2)
     return loss 
 
 def now_loss(output_1,target_1):
-    return torch.mean((output_1 - target_1) ** 2)
+    xyz = output_1[:3]
+    quto = output_1[3:]
+    xyz_1 = target_1[:3]
+    quto_1 = target_1[3:]
+    temp_1 = torch.mean((xyz_1 - xyz)**2)
+    temp_2 = torch.mean((quto_1 - quto)**2)
+#    return torch.mean((output_1 - target_1) ** 2)
+    # torch.ger(output_1,target_1)
+    return temp_1 + temp_2

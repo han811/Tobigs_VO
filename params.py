@@ -14,8 +14,11 @@ class Parameters():
 		#################
 		### video num ###
 		#################
-		self.train_video = ['00', '01', '02', '05', '08', '09']
-		# self.train_video = ['04']
+		# self.train_video = ['00', '01', '02', '05', '08', '09']
+		# self.train_video = ['01','04','07']
+		self.train_video = ['07']
+		# self.train_video = ['01','04']
+
 		self.valid_video = ['04', '06', '07', '10']
 
 

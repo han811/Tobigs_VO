@@ -16,6 +16,8 @@ from torch.utils.data.sampler import Sampler
 from torchvision import transforms
 
 from params import par
+
+# import PyKDL
 #################################
 ### tobi - import package end ###
 #################################
@@ -59,8 +61,8 @@ def get_data_info_tobi(folder_list, overlap=False, pad_y=False, shuffle=False):
             Y += y_segs
             X_path += x_segs
         else:
-            x_segs = [fpaths[i:i+6] for i in range(0, n_frames-5, 1)]
-            y_segs = [poses[i:i+6] for i in range(0, n_frames-5, 1)]
+            x_segs = [fpaths[i:i+6] for i in range(0, n_frames-5, 6-overlap)]
+            y_segs = [poses[i:i+6] for i in range(0, n_frames-5, 6-overlap)]
             Y += y_segs
             X_path += x_segs
 
@@ -92,9 +94,9 @@ class ImageSequenceDataset(Dataset):
     def __getitem__(self, index):
         groundtruth_sequence = (self.groundtruth_arr[index]).copy()
         
-        temp = np.ones((6,3))
+        temp = np.ones((6,7))
         for i in range(6):
-            for j in range(3):
+            for j in range(7):
                 temp[i][j] = groundtruth_sequence[i][j]
         for i in range(6):
             for j in range(3):
@@ -102,6 +104,18 @@ class ImageSequenceDataset(Dataset):
                     groundtruth_sequence[i][j] = groundtruth_sequence[i][j] - temp[i][j]
                 else:
                     groundtruth_sequence[i][j] = groundtruth_sequence[i][j] - temp[i-1][j]
+        for i in range(6):
+            if i!=0:
+                a = R_.from_quat([temp[i-1][3],temp[i-1][4],temp[i-1][5],temp[i-1][6]])
+                b = R_.from_quat([temp[i][3],temp[i][4],temp[i][5],temp[i][6]])
+                c = b.as_rotvec()-a.as_rotvec()
+                c = R_.from_rotvec(c)
+                c = c.as_quat()
+                groundtruth_sequence[i][3] = c[0]
+                groundtruth_sequence[i][4] = c[1]
+                groundtruth_sequence[i][5] = c[2]
+                groundtruth_sequence[i][6] = c[3]
+
     
         image_path_sequence = self.image_arr[index]        
         image_sequence = []

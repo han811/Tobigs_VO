@@ -31,6 +31,7 @@ def plot_route(gt, c_gt='g', c_out='r'):
 	print(y[0:20])
 
 	plt.plot(x, y, color=c_gt, label='Ground Truth')
+	# plt.xlim(-300,300)
 	plt.savefig(predicted_result_dir+str(video))
 	# plt.show()
 
@@ -57,7 +58,8 @@ def plot_route_predict(out, c_gt='g', c_out='r'):
 	# y /= 100
 
 	plt.plot(x, y, color=c_out, label='Predict')
-	plt.savefig(predicted_result_dir+'predict')
+	# plt.xlim(-300,300)
+	plt.savefig(predicted_result_dir+'predict2')
 
 if __name__=='__main__':
 	# Load in GT and predicted pose

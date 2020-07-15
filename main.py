@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.autograd import Variable
+from torch.autograd import Variable, gradcheck
 import torch.utils as utils
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from tobi_util import ResNet, Bottleneck, ResNet_5 , ResNet_5_2
 from config import resnet_blk as r
 from model import Tobi_model, my_loss, get_loss
-
+import torch_optimizer as optim_
 import os
 from params import par
 from data_helper import get_data_info_tobi, ImageSequenceDataset
@@ -20,10 +20,11 @@ from torch.utils.tensorboard import SummaryWriter
 
 import time
 
+torch.autograd.set_detect_anomaly(True)
 
 train=True
 gpu=True
-load=True
+load=False
 
 predict_path = os.getcwd()+'/result/'
 model_path = os.getcwd()+'/weight'
@@ -31,9 +32,7 @@ log_path = os.getcwd()+'/log'
 
 writer = SummaryWriter(log_path)
 
-test_num=44
-
-
+test_num=218
 # should fix for when batch != 1
 def run(model,data,optimizer,epoch,scheduler,batch=1):
     best_val = 10**8
@@ -43,14 +42,16 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
     loss = 0
     for j in range(epoch):
         sum_loss = 0
+        # arr = np.arange(n)
+        # np.random.shuffle(arr)
+        h_ = None
+        h_2 = None
         for i in range(n):
             if gpu==False:
                 input_ = torch.FloatTensor(data[i][0])
                 input_.requires_grad=True
                 input_ = torch.reshape(input_,(6,1,3,224,224))
                 label_ = torch.FloatTensor(data[i][1])
-
-
 
                 # if batch==1:  
                 #     input_ = torch.FloatTensor(data[i][0])
@@ -98,20 +99,21 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
                 #         else:
                 #             input_temp = torch.FloatTensor(data[i*batch+k][0])
                 #             input_temp.requires_grad=True
-                #             input_temp = torch.reshape(input_temp,(6,1,3,224,224)).cuda()
+                #             input_temp = torch.r, eshape(input_temp,(6,1,3,224,224)).cuda()
                 #             input_ = torch.cat([input_,input_temp],dim=0).cuda()
                 #             label_temp = torch.FloatTensor(data[i*batch+k][1]).cuda()
                 #             label_ = torch.cat([label_,label_temp],dim=0).cuda()
             # loss = model.get_loss(input_,label_[1:6])
             # input_.requires_grad = False
-            out_1 = model(input_)
+            # test = gradcheck(model,input_)
+            # print(test)
+            out_1= model(input_)
             # out_2 = model(torch.cat([input_[1],input_[2]],dim=0))
-            # out_3 = model(torch.cat([input_[2],input_[3]],dim=0))
+            # out_3 = model(torch.cat([input_[2],input_[3]],dim= 
             # out_4 = model(torch.cat([input_[3],input_[4]],dim=0))
             # out_5 = model(torch.cat([input_[4],input_[5]],dim=0))
             # out_con = torch.cat([out_1,out_2,out_3,out_4,out_5],dim=0)
-            
-            loss = loss + my_loss(out_1, label_[1:6])
+            loss = loss + my_loss(out_1, label_[1:6,0:7])
             
             if((i>=batch-1) and ((i+1)%batch==0)):
                 optimizer.zero_grad()
@@ -119,6 +121,7 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
                 # loss.backward()
                 loss.backward(retain_graph=True)
                 optimizer.step()
+        #        scheduler.step()
                 print('{} / {} || epoch : {} || loss : {}'.format((i+1), n, j+1, loss))
                 loss = 0
             
@@ -135,36 +138,43 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
         sum_loss = 0
         loss = 0
         if j%20==0:
-            torch.save(tobiVO.state_dict(),model_path+'/modelsize'+str(j)+'.pth')
+            # torch.save(tobiVO.state_dict(),model_path+'/modelsize'+str(j)+'GELU.pth')
+            torch.save(tobiVO.state_dict(),model_path+'/modelsize'+str(j)+'GELU_2.pth')
 
 if __name__ == "__main__":
-    gpu_num = 3
+    gpu_num = 0
     device = torch.device(f'cuda:{gpu_num}' if torch.cuda.is_available() else 'cpu')
     torch.cuda.set_device(device)
 
 
-    train_df = get_data_info_tobi(folder_list=par.train_video, overlap=False, pad_y=False, shuffle=False)	
+    train_df = get_data_info_tobi(folder_list=par.train_video, overlap=True, pad_y=False, shuffle=False)	
     train_dataset = ImageSequenceDataset(train_df, par.resize_mode, (par.img_w, par.img_h), par.img_means, par.img_stds, par.minus_point_5)
 
     if train==True:
         if gpu==False:
             tobiVO = Tobi_model()
         else:
-            tobiVO = Tobi_model().cuda()
+            with torch.no_grad():
+                tobiVO = Tobi_model().cuda()
         # optimizer = optim.Adam(tobiVO.parameters(), lr=0.0001)
         if load==True:
-            tobiVO.load_state_dict(torch.load(model_path+'/modelsize6.pth')) # setting plz
+            tobiVO.load_state_dict(torch.load(model_path+'/modelsize160GELU_2.pth')) # setting plz
+        #optimizer = optim_.Yogi(tobiVO.parameters(), lr=0.00001, betas=(0.9,0.99),eps=0.0000001
+        #,initial_accumulator=1e-6, weight_decay=0.15)
+        #optimizer = optim_.Lookahead(yogi,k=5,alpha=0.5)
         optimizer = optim.Adam(tobiVO.parameters(), lr=0.00001)
-        # optimizer = optim.Adam(tobiVO.parameters(), lr=0.0001)
 
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=400, gamma=0.5)
-        run(model=tobiVO,data=train_dataset,batch=2,optimizer=optimizer,epoch=2000,scheduler=scheduler)
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=80, gamma=0.5)
+        run(model=tobiVO,data=train_dataset,batch=1,optimizer=optimizer,epoch=2000,scheduler=scheduler)
     else:
         if gpu==False:
             tobiVO = Tobi_model()
         else:
             tobiVO = Tobi_model().cuda()
-        tobiVO.load_state_dict(torch.load(model_path+'/modelsize7.pth')) # setting plz
+        tobiVO.load_state_dict(torch.load(model_path+'/modelsize160GELU_2.pth')) # setting plz
+        #tobiVO.load_state_dict(torch.load('/home/kth/Desktop/Tobigs/ws'+'/modelsize40GELU.pth')) # setting plz        
+        
+
         tobiVO.eval()
 
         #######################
@@ -172,18 +182,20 @@ if __name__ == "__main__":
         #######################
         a = np.array([0])
         start_time = time.time()
+        h_ = None
+        h_2 = None
         for i in range(test_num):
             if gpu==False:
                 input_ = torch.FloatTensor(train_dataset[i][0])
                 input_ = torch.reshape(input_,(6,1,3,224,224))
                 input_.requires_grad=False
 
-                if j==0:
-                    answer = tobiVO.forward(input_)
+                if i==0:
+                    answer, h_, h_2 = tobiVO.forward(input_,h_ ,h_2)
                     answer = answer.detach()
                     a = answer.numpy()
                 else:
-                    answer = tobiVO.forward(input_)
+                    answer, h_, h_2 = tobiVO.forward(input_,h_,h_2)
                     answer = answer.detach()
                     a = np.concatenate((a,answer.numpy()), axis=0)
 
@@ -199,19 +211,20 @@ if __name__ == "__main__":
                 print('{} / {} '.format(i, test_num))
 
             else:
-                input_ = torch.FloatTensor(train_dataset[i][0]).cuda()
-                input_ = torch.reshape(input_,(6,1,3,224,224)).cuda()
-                input_.requires_grad=False
-                if i==0:
-                    answer = tobiVO.forward(input_)
-                    answer = answer.detach()
-                    answer = answer.cpu()
-                    a = answer.numpy()
-                else:
-                    answer = tobiVO.forward(input_)
-                    answer = answer.detach()
-                    answer = answer.cpu()
-                    a = np.concatenate((a,answer.numpy()), axis=0)
+                with torch.no_grad():
+                    input_ = torch.FloatTensor(train_dataset[i][0]).cuda()
+                    input_ = torch.reshape(input_,(6,1,3,224,224)).cuda()
+                    input_.requires_grad=False
+                    if i==0:
+                        answer, h_, h_2 = tobiVO.forward(input_, h_, h_2)
+                        answer = answer.detach()
+                        answer = answer.cpu()
+                        a = answer.numpy()
+                    else:
+                        answer, h_, h_2 = tobiVO.forward(input_, h_, h_2)
+                        answer = answer.detach()
+                        answer = answer.cpu()
+                        a = np.concatenate((a,answer.numpy()), axis=0)
 
                 # for j in range(5):
                 #     if(i==0 and j==0):
