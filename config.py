@@ -50,31 +50,27 @@ linear_block['layer2']=1024
 # rnn_block1 settings
 rnn_block1 = dict()
 # rnn_block1['input_size']=4096
-# rnn_block1['input_size']=2048
 rnn_block1['input_size']=2048
-
-rnn_block1['hidden_size']=500
-rnn_block1['num_layers']=1
+rnn_block1['hidden_size']=1000
+rnn_block1['num_layers']=2
 rnn_block1['batch_first']=True
 
 # rnn_block2 settings
 rnn_block2 = dict()
 # rnn_block2['input_size']=4096
-# rnn_block2['input_size']=2048
 rnn_block2['input_size']=2048
-
-rnn_block2['hidden_size']=500
+rnn_block2['hidden_size']=1000
 rnn_block2['num_layers']=1
 rnn_block2['batch_first']=True
 
 # fc_layer1 settings
 fc1 = dict()
-fc1['input']=500 #1000
+fc1['input']=1000
 fc1['output']=1024
 
 # fc_layer2 settings
 fc2 = dict()
-fc2['input']=500 #1000
+fc2['input']=1000
 fc2['output']=1024
 
 # fc_layer3 settings

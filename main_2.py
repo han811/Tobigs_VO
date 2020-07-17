@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 from tobi_util import ResNet, Bottleneck, ResNet_5 , ResNet_5_2
 from config import resnet_blk as r
-from model import Tobi_model, my_loss, get_loss
+from model_2 import Tobi_model, my_loss, get_loss
 import torch_optimizer as optim_
 import os
 from params import par
@@ -22,8 +22,9 @@ import time
 
 torch.autograd.set_detect_anomaly(True)
 
-train=False
+train=True
 gpu=True
+
 load=False
 
 predict_path = os.getcwd()+'/result/'
@@ -41,10 +42,10 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
     # r = len(data)%batch
     loss = 0
     for j in range(epoch):
-        model.h_1 = Variable(torch.zeros(5,1, 1000)).cuda()
-        model.h_2 = Variable(torch.zeros(5,1, 1000)).cuda()
-        model.h_3 = Variable(torch.zeros(5,1, 1000)).cuda()
-        model.h_4 = Variable(torch.zeros(5,1, 1000)).cuda()
+        model.h_1 = Variable(torch.zeros(1, r['rnn1']['hidden_size'])).cuda()
+        model.h_2 = Variable(torch.zeros(1, r['rnn1']['hidden_size'])).cuda()
+        model.h_3 = Variable(torch.zeros(1, r['rnn1']['hidden_size'])).cuda()
+        model.h_4 = Variable(torch.zeros(1, r['rnn1']['hidden_size'])).cuda()
         sum_loss = 0
         # arr = np.arange(n)
         # np.random.shuffle(arr)
@@ -110,16 +111,17 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
             # loss = model.get_loss(input_,label_[1:6])
             # input_.requires_grad = False
             # test = gradcheck(model,input_)
-            # print(test)
-            out_1= model(input_)
-
-            # out_2 = model(torch.cat([input_[1],input_[2]],dim=0))
-            # out_3 = model(torch.cat([input_[2],input_[3]],dim= 
-            # out_4 = model(torch.cat([input_[3],input_[4]],dim=0))
-            # out_5 = model(torch.cat([input_[4],input_[5]],dim=0))
-            # out_con = torch.cat([out_1,out_2,out_3,out_4,out_5],dim=0)
-            loss = loss + my_loss(out_1, label_[1:6,0:7])
-            print(out_1)
+            print(type(label_[0]))
+            out_1 = model(torch.cat([input_[0],input_[1]],dim=0))
+            out_2 = model(torch.cat([input_[1],input_[2]],dim=0))
+            out_3 = model(torch.cat([input_[2],input_[3]],dim=0)) 
+            out_4 = model(torch.cat([input_[3],input_[4]],dim=0))
+            out_5 = model(torch.cat([input_[4],input_[5]],dim=0))
+            out_con = torch.cat([out_1,out_2,out_3,out_4,out_5],dim=0)
+            loss = loss + my_loss(out_con, label_[1:6,0:7])
+            print(out_con)
+            # print(out_con)
+            # print(label_[1:6,0:7])
             # if loss.item() >= 1:
             #     print(label_[1,0:7])
             #     print(out_1[0])
@@ -148,7 +150,7 @@ def run(model,data,optimizer,epoch,scheduler,batch=1):
         loss = 0
         if j%20==0:
             # torch.save(tobiVO.state_dict(),model_path+'/modelsize'+str(j)+'GELU.pth')
-            torch.save(tobiVO.state_dict(),model_path+'/modelsize'+str(j)+'GELU_2.pth')
+            torch.save(tobiVO.state_dict(),model_path+'/modelsize'+str(j)+'GELU_2_f_mse_nb_.pth')
 
 if __name__ == "__main__":
     gpu_num = 0
@@ -166,11 +168,11 @@ if __name__ == "__main__":
             tobiVO = Tobi_model().cuda()
         # optimizer = optim.Adam(tobiVO.parameters(), lr=0.0001)
         if load==True:
-            tobiVO.load_state_dict(torch.load(model_path+'/modelsize20GELU_2.pth')) # setting plz
+            tobiVO.load_state_dict(torch.load(model_path+'/modelsize120GELU_2_f.pth')) # setting plz
         #yogi = optim_.Yogi(tobiVO.parameters(), lr=0.000001, betas=(0.9,0.99),eps=0.0000001)
         #,initial_accumulator=1e-6, weight_decay=0.15)
         #optimizer = optim_.Lookahead(yogi,k=5,alpha=0.5)
-        optimizer = optim.Adam(tobiVO.parameters(), lr=0.0001)
+        optimizer = optim.Adam(tobiVO.parameters(), lr=0.0000001)
 
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=80, gamma=0.5)
         run(model=tobiVO,data=train_dataset,batch=1,optimizer=optimizer,epoch=2000,scheduler=scheduler)
@@ -179,14 +181,14 @@ if __name__ == "__main__":
             tobiVO = Tobi_model()
         else:
             tobiVO = Tobi_model().cuda()
-        tobiVO.load_state_dict(torch.load(model_path+'/modelsize80GELU_2.pth')) # setting plz
+        tobiVO.load_state_dict(torch.load(model_path+'/modelsize100GELU_2_f.pth')) # setting plz
         #tobiVO.load_state_dict(torch.load('/home/kth/Desktop/Tobigs/ws'+'/modelsize40GELU.pth')) # setting plz        
-        tobiVO.h_1 = Variable(torch.zeros(5,1, 1000)).cuda()
-        tobiVO.h_2 = Variable(torch.zeros(5,1, 1000)).cuda()
-        tobiVO.h_3 = Variable(torch.zeros(5,1, 1000)).cuda()
-        tobiVO.h_4 = Variable(torch.zeros(5,1, 1000)).cuda()
+        tobiVO.h_1 = Variable(torch.zeros(1, 1000)).cuda()
+        tobiVO.h_2 = Variable(torch.zeros(1, 1000)).cuda()
+        tobiVO.h_3 = Variable(torch.zeros(1, 1000)).cuda()
+        tobiVO.h_4 = Variable(torch.zeros(1, 1000)).cuda()
 
-        #tobiVO.eval()
+        tobiVO.eval()
 
         #######################
         ### prediction part ###
@@ -229,21 +231,26 @@ if __name__ == "__main__":
                     input_ = torch.reshape(input_,(6,1,3,224,224)).cuda()
                     input_.requires_grad=False
                     # print(input_)
-                    print(tobiVO.h_4)
+                    # print(tobiVO.h_4)
                     if i==0:
-                        answer = tobiVO(input_)
-                        answer = answer.detach()
-                        answer = answer.cpu()
-                        a = answer.numpy()
+                        for j in range(5):
+                            answer = tobiVO(input_[j:j+2])
+                            answer = answer.detach()
+                            answer = answer.cpu()
+                            if j==0:
+                                a = answer.numpy()
+                            else:
+                                a = np.concatenate((a,answer.numpy()), axis=0)
                     else:
-                        answer = tobiVO(input_)
-                        print(answer)
-                        #print(answer.size())
-                        answer = answer.detach()
-                        answer = answer.cpu()
+                        for j in range(5):
+                            answer = tobiVO(input_[j:j+2])
+                            # print(answer)
+                            #print(answer.size())
+                            answer = answer.detach()
+                            answer = answer.cpu()
 
-                        a = np.concatenate((a,answer.numpy()), axis=0)
-
+                            a = np.concatenate((a,answer.numpy()), axis=0)
+                    
                 # for j in range(5):
                 #     if(i==0 and j==0):
                 #         answer = tobiVO.forward(torch.cat([input_[j],input_[j+1]],dim = 0))
@@ -256,6 +263,20 @@ if __name__ == "__main__":
                 #         answer = answer.cpu()
                 #         a = np.concatenate((a, answer.numpy()), axis=0)
                 print('{} / {} '.format(i, test_num), end='\r')
+            
+        f = open('/home/kth/Desktop/Tobigs/ws/result_txt/result.txt','w')
+        for i in range(a.shape[0]):
+            f.write(np.array_str(a[i])+'\n')
+        f.close()
+        f = open('/home/kth/Desktop/Tobigs/ws/result_txt/result_label.txt','w')
+        for i in range(test_num):
+            for j in range(1,6):
+                f.write(np.array_str(train_dataset[i][1][j].numpy())+'\n')
+                # print(np.array_str(train_dataset[i][1][j].numpy()))
+
+        f.close()
+        # print(type(train_dataset[1][1]))
+        # print(train_dataset[1][1])
         print('save')
         print("mean inference time = ",(time.time()-start_time)/test_num)
         np.save(predict_path+'x_predict.npy',a)

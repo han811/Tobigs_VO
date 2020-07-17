@@ -45,10 +45,10 @@ def weight_init(m):
         if m.bias is not None:
             init.normal_(m.bias.data)
     elif isinstance(m, nn.BatchNorm1d):
-        init.normal_(m.weight.data, mean=1, std=0.02)
+        init.normal_(m.weight.data, mean=0, std=0.02)
         init.constant_(m.bias.data, 0)
     elif isinstance(m, nn.BatchNorm2d):
-        init.normal_(m.weight.data, mean=1, std=0.02)
+        init.normal_(m.weight.data, mean=0, std=0.02)
         init.constant_(m.bias.data, 0)
     elif isinstance(m, nn.BatchNorm3d):
         init.normal_(m.weight.data, mean=1, std=0.02)
@@ -86,13 +86,13 @@ def weight_init(m):
 
 
 def res_5():
-    return  ResNet_5(Bottleneck, [3, 4, 6, 3])
+    return  ResNet_5(Bottleneck, [2, 2, 2, 2])
 
 def res_5_2():
-    return  ResNet_5_2(Bottleneck, [3, 4, 6, 3])
+    return  ResNet_5_2(Bottleneck, [2, 2, 2, 2])
 
 def ResNet50():
-    return ResNet(Bottleneck, [3, 4, 6, 3])
+    return ResNet(Bottleneck, [2, 2, 2, 2])
 
 class Tobi_model(nn.Module):
     def __init__(self):
@@ -100,10 +100,10 @@ class Tobi_model(nn.Module):
         self.Res = ResNet50()
         self.Res_5 = res_5()
         self.Res_5_2 = res_5_2()
-        self.GELU = nn.GELU()
+        self.GELU = nn.ReLU()
         self.rnn = nn.LSTMCell(input_size=r['rnn1']['input_size'], hidden_size=r['rnn1']['hidden_size'])#, num_layers=r['rnn1']['num_layers'], batch_first=r['rnn1']['batch_first'],bidirectional=True)
         self.rnn_2 = nn.LSTMCell(input_size=r['rnn2']['input_size'], hidden_size=r['rnn2']['hidden_size'])#, num_layers=r['rnn2']['num_layers'], batch_first=r['rnn2']['batch_first'], bidirectional=True)
-        self.rnn_2_ = nn.LSTMCell(input_size=2048, hidden_size=2048)#, num_layers=r['rnn2']['num_layers'], batch_first=r['rnn2']['batch_first'], bidirectional=True)
+        self.rnn_2_ = nn.LSTMCell(input_size=1000, hidden_size=1000)#, num_layers=r['rnn2']['num_layers'], batch_first=r['rnn2']['batch_first'], bidirectional=True)
 
         # self.rnn = nn.LSTMCell(input_size=r['rnn1']['input_size'], hidden_size=r['rnn1']['hidden_size'])#, num_layers=r['rnn1']['num_layers'], batch_first=r['rnn1']['batch_first'],bidirectional=True)
         # self.rnn_2 = nn.LSTMCell(input_size=r['rnn2']['input_size'], hidden_size=r['rnn2']['hidden_size'])#, num_layers=r['rnn2']['num_layers'], batch_first=r['rnn2']['batch_first'], bidirectional=True)
@@ -125,26 +125,38 @@ class Tobi_model(nn.Module):
         self.norm1 = nn.BatchNorm2d(3)
         self.norm2 = nn.BatchNorm2d(3)
 
+        # self.n1 = nn.BatchNorm1d(1024)
+        # self.n2 = nn.BatchNorm1d(1024)
+
+        # self.n3 = nn.BatchNorm1d(2048)
+
+        # self.n4 = nn.BatchNorm2d
+        # self.n5 = nn.BatchNorm2d
+        # self.n6 = nn.BatchNorm2d
+
+
         for m in self.modules():
             weight_init(m)
-        self.h_1 = torch.zeros(5,1,1000).cuda()
-        self.h_2 = torch.zeros(5,1,1000).cuda()
-        self.h_3 = torch.zeros(5,1,1000).cuda()
-        self.h_4 = torch.zeros(5,1,1000).cuda()
-        self.h_5 = torch.zeros(5,1,2048).cuda()
-        self.h_6 = torch.zeros(5,1,2048).cuda()
+        self.h_1 = torch.zeros(1,1000).cuda()
+        self.h_2 = torch.zeros(1,1000).cuda()
+        self.h_3 = torch.zeros(1,1000).cuda()
+        self.h_4 = torch.zeros(1,1000).cuda()
+        self.h_5 = torch.zeros(1,1000).cuda()
+        self.h_6 = torch.zeros(1,1000).cuda()
+
+        self.test1_ = nn.Linear(2048,1000)
+        self.test2_ = nn.Linear(2048,1000)
 
 
     def forward(self, x):
     
-        x_1 = x[1:,:]  # t-1  step
-        print(x_1.size())
-        x_2 = x[:-1,:] # t step
-        print(x_2.size())
-
+        x_1 = x[0]  # t-1  step
+        x_2 = x[1] # t step
+        print(x_1)
+       
         # print("00",x_1.size())
-        x_1 = x_1.view(5,3,224,224)
-        x_2 = x_2.view(5,3,224,224)
+        x_1 = x_1.view(1,3,224,224)
+        x_2 = x_2.view(1,3,224,224)
         # print(x_1.size())
         # x_1 = self.norm1(x_1)
         # x_2 = self.norm2(x_2)
@@ -156,8 +168,6 @@ class Tobi_model(nn.Module):
         x_1 = self.Res(x_1)
         x_2 = self.Res(x_2)
         # print("02",x_2.size())
-        print(x_1.size())
-        print(x_2.size())
         ###########
         ###RCNN1###
         ###########
@@ -165,49 +175,44 @@ class Tobi_model(nn.Module):
         # print(x_3.size())
         x_3 = self.Res_5(x_3)
         # x_3 = x_3.view(1,5,2048)
-        x_3 = x_3.view(5,1,2048)
+        x_3 = x_3.view(1,2048)
 
 
         # print(x_3.size())
-        for i in range(5):
-            if i == 0:
-                self.h_5[0], self.h_6[0] = self.rnn_2_(x_3[0], (self.h_5[4], self.h_6[4]))
-                self.h_3[0], self.h_4[0] = self.rnn_2(self.h_5[0], (self.h_3[4], self.h_4[4]))
-            else:
-                self.h_5[i], self.h_6[i]= self.rnn_2_(x_3[i], (self.h_5[i-1], self.h_6[i-1]))
-                self.h_3[i], self.h_4[i]= self.rnn_2(self.h_5[i], (self.h_3[i-1], self.h_4[i-1]))
 
-        self.h_3 = Variable(self.h_3.data)
-        self.h_4 = Variable(self.h_4.data)
-        self.h_5 = Variable(self.h_5.data)
-        self.h_6 = Variable(self.h_6.data)
+        # self.h_5, self.h_6 = self.rnn_2(x_3, (self.h_5, self.h_6))
+    #    self.h_3, self.h_4 = self.rnn_2_(self.h_5, (self.h_3, self.h_4))
+
+        # self.h_3 = Variable(self.h_3.data)
+        # self.h_4 = Variable(self.h_4.data)
+        # self.h_5 = Variable(self.h_5.data)
+        # self.h_6 = Variable(self.h_6.data)
 
 
-        x_3 = self.h_3
+        # x_3 = self.h_3
+        x_3 = self.test1_(x_3)
         # x_3 = self.fc1(x_3)
         x_3 = self.fc1(x_3)
         x_3 = self.GELU(x_3)
-
+        x_3 = self.n1(x_3)
         ###########
         ###RCNN2###
         ###########
         x_2 = self.Res_5_2(x_2)
         # print("1",x_2.size())
-        x_2 = x_2.view(5,1,2048)
-        for i in range(5):
-            if i == 0:
-                self.h_1[0], self.h_2[0] = self.rnn_2(x_2[0], (self.h_1[4], self.h_2[4]))
-            else:
-                self.h_1[i], self.h_2[i]= self.rnn_2(x_2[i], (self.h_1[i-1], self.h_2[i-1]))
-        # print("2",x_2.size()) 
-        self.h_1 = Variable(self.h_1.data)  
-        self.h_2 = Variable(self.h_2.data)  
+        x_2 = x_2.view(1,2048)
+        # self.h_1, self.h_2 = self.rnn_2(x_2, (self.h_1, self.h_2))
+        # # print("2",x_2.size()) 
+        # self.h_1 = Variable(self.h_1.data)  
+        # self.h_2 = Variable(self.h_2.data)  
 
-        x_2 = self.h_1
+        # x_2 = self.h_1
+        x_2 = self.test2_(x_2)
         x_2 = self.fc2(x_2)
         # x_2 = self.fc2(x_2)
         # print("3",x_2.size())
         x_2 = self.GELU(x_2)
+        x_2 = self.n2(x_2)
         # print("4",x_2.size())
 
         ##############
@@ -215,9 +220,10 @@ class Tobi_model(nn.Module):
         ##############
         # x_2 = x_2.view(1,r['fc1']['output'])
         # x_3 = x_3.view(1,r['fc2']['output'])
-        x_3 = torch.cat([x_2,x_3],dim = 2)
+        x_3 = torch.cat([x_2,x_3],dim = 1)
         x_3 = self.fc3(x_3)
         x_3 = self.GELU(x_3)
+        x_3 = self.n3(x_3)
 
 
         ####test####
@@ -232,8 +238,8 @@ class Tobi_model(nn.Module):
         # print(x_4.size())
         # print(x_5.size())
 
-        out = torch.cat([x_4,x_5],dim=2)
-        out = out.view(5,7)
+        out = torch.cat([x_4,x_5],dim=1)
+        out = out.view(1,7)
         return out
 
 
@@ -322,21 +328,21 @@ def now_loss(output_1,target_1):
     quto = output_1[3:]
     xyz_1 = target_1[:3]
     quto_1 = target_1[3:]
-    if (xyz[0]*xyz_1[0] <=0): 
-        temp_1_1 = ((xyz_1[0] - xyz[0])**2)*10
-    else:
-        temp_1_1 = ((xyz_1[0] - xyz[0])**2)
-    if (xyz[1]*xyz_1[1] <=0): 
-        temp_1_2 = ((xyz_1[1] - xyz[1])**2)*10
-    else:
-        temp_1_2 = ((xyz_1[1] - xyz[1])**2)
-    if (xyz[2]*xyz_1[2] <=0): 
-        temp_1_3 = ((xyz_1[2] - xyz[2])**2)*10
-    else:
-        temp_1_3 = ((xyz_1[2] - xyz[2])**2)
+    # if (xyz[0]*xyz_1[0] <=0): 
+    #     temp_1_1 = ((xyz_1[0] - xyz[0])**2)*10
+    # else:
+    #     temp_1_1 = ((xyz_1[0] - xyz[0])**2)
+    # if (xyz[1]*xyz_1[1] <=0): 
+    #     temp_1_2 = ((xyz_1[1] - xyz[1])**2)*10
+    # else:
+    #     temp_1_2 = ((xyz_1[1] - xyz[1])**2)
+    # if (xyz[2]*xyz_1[2] <=0): 
+    #     temp_1_3 = ((xyz_1[2] - xyz[2])**2)*10
+    # else:
+    #     temp_1_3 = ((xyz_1[2] - xyz[2])**2)
         
-    temp_1 = temp_1_1 + temp_1_2 + temp_1_3
-    temp_2 = torch.mean((quto_1 - quto)**2)
-#    return torch.mean((output_1 - target_1) ** 2)
+    # temp_1 = temp_1_1 + temp_1_2 + temp_1_3
+    # temp_2 = torch.mean((quto_1 - quto)**2)
+    return torch.mean((output_1 - target_1) ** 2)
     # torch.ger(output_1,target_1)
-    return temp_1 + temp_2
+    # return temp_1 + temp_2

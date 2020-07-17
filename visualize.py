@@ -27,8 +27,8 @@ y_idx = 2
 def plot_route(gt, c_gt='g', c_out='r'):
 	x = [v for v in gt[:, x_idx]]
 	y = [v for v in gt[:, y_idx]]
-	print(x[0:20])
-	print(y[0:20])
+	# print(x[0:20])
+	# print(y[0:20])
 
 	plt.plot(x, y, color=c_gt, label='Ground Truth')
 	# plt.xlim(-300,300)
@@ -51,9 +51,9 @@ def plot_route_predict(out, c_gt='g', c_out='r'):
 
 	# x = [v+x_temp for v in out[:, x_idx]]
 	# y = [v+y_temp for v in out[:, y_idx]]
-	print(sum(x[0:20]))
-	print(sum(y[0:20]))
-	print(y[0:20])
+	# print(sum(x[0:20]))
+	# print(sum(y[0:20]))
+	# print(y[0:20])
 	# x /= 100
 	# y /= 100
 
@@ -61,9 +61,41 @@ def plot_route_predict(out, c_gt='g', c_out='r'):
 	# plt.xlim(-300,300)
 	plt.savefig(predicted_result_dir+'predict2')
 
+def plot_route_predict2(out, c_gt='g', c_out='r'):
+	x_temp=0
+	y_temp=0
+	x=[]
+	y=[]
+	# x_idx=1
+	# y_idx=0
+	for i in range(len(out)):
+		for j in range(1,6):
+			x_temp+=out[i][1][j][x_idx].tolist() #/100
+			y_temp+=out[i][1][j][y_idx].tolist() #/100
+			x+=[x_temp]
+			y+=[y_temp]
+			print(i,j,end='\r')
+
+	# x = [v+x_temp for v in out[:, x_idx]]
+	# y = [v+y_temp for v in out[:, y_idx]]
+	# print(sum(x[0:20]))
+	# print(sum(y[0:20]))
+	# print(y[0:20])
+	# x /= 100
+	# y /= 100
+
+	plt.plot(x, y, color=c_out, label='Predict')
+	# plt.xlim(-300,300)
+	plt.savefig(predicted_result_dir+'predict2_2')
+
 if __name__=='__main__':
+	# train_df = get_data_info_tobi(folder_list=par.train_video, overlap=True, pad_y=False, shuffle=False)	
+	# train_dataset = ImageSequenceDataset(train_df, par.resize_mode, (par.img_w, par.img_h), par.img_means, par.img_stds, par.minus_point_5)
+	# plot_route_predict2(train_dataset)
 	# Load in GT and predicted pose
-	video_list = ['00','01','02','03','04','05','06','07']
+	# video_list = ['00','01','02','03','04','05','06','07']
+	video_list = ['07']
+
 	for video in video_list:
 		predict = np.load(predict_path+'x_predict.npy')
 		GT_pose_path = '{}{}.npy'.format(pose_GT_dir, video)
